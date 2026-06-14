@@ -23,10 +23,12 @@ class ApiClient {
     // Interceptor: aggiunge JWT a ogni richiesta
     _dio.interceptors.add(InterceptorsWrapper(
       onRequest: (options, handler) async {
-        final token = await _authService.getToken();
-        if (token != null) {
-          options.headers['Authorization'] = 'Bearer $token';
-        }
+        try {
+          final token = await _authService.getToken();
+          if (token != null) {
+            options.headers['Authorization'] = 'Bearer $token';
+          }
+        } catch (_) {}
         return handler.next(options);
       },
       onError: (DioException e, handler) async {
