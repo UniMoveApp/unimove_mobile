@@ -1,7 +1,7 @@
 name: unimove
 description: Applicazione di carpooling per l'Università degli Studi del Molise.
 publish_to: 'none'
-version: 1.0.0+1
+version: 1.0.0
 
 environment:
   sdk: '>=3.0.0 <4.0.0'
@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
 
   # HTTP & API
-  http: ^1.2.1
+  dio: ^5.4.3
 
   # State management
   flutter_riverpod: ^2.5.1
@@ -19,6 +19,7 @@ dependencies:
 
   # Autenticazione & sicurezza
   flutter_secure_storage: ^9.2.2
+  dart_jsonwebtoken: ^2.8.1
 
   # Navigazione
   go_router: ^14.2.7
@@ -32,3 +33,10 @@ dev_dependencies:
 
 flutter:
   uses-material-design: true
+  assets:
+    - assets/images/
+
+flutter_launcher_icons:
+  android: "launcher_icon"
+  image_path: "assets/icon/icon.png"
+  min_sdk_android: 21
