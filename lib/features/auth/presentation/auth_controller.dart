@@ -39,10 +39,8 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<bool> login(String username, String password) async {
-    print("[DEBUG LOGIN] AuthController.login avviato per l'utente: $username");
     state = AuthState.loading();
     try {
-      print("[DEBUG LOGIN] Chiamata POST su 'auth/login' in corso...");
       final response = await _apiClient.dio.post(
         'auth/login',
         data: {
@@ -51,30 +49,21 @@ class AuthController extends StateNotifier<AuthState> {
         },
       );
 
-      print("[DEBUG LOGIN] Risposta ricevuta con status: ${response.statusCode}");
       if (response.statusCode == 200) {
         final token = response.data['token'];
         if (token != null) {
-          print("[DEBUG LOGIN] Token ricevuto: $token. Salvo in Secure Storage...");
           await _authService.saveToken(token);
           state = AuthState.authenticated();
-          print("[DEBUG LOGIN] Stato aggiornato a: AUTHENTICATED");
           return true;
         }
       }
-      print("[DEBUG LOGIN] Login fallito (status non 200 o token nullo)");
       state = AuthState.unauthenticated(error: 'Errore durante il login');
       return false;
     } on DioException catch (e) {
-      print("[DEBUG LOGIN] DioException catturata nel controller: ${e.message}");
-      if (e.response != null) {
-        print("[DEBUG LOGIN] Dati errore response: ${e.response?.data}");
-      }
       final message = e.response?.data?['message'] ?? 'Credenziali errate o errore di rete';
       state = AuthState.unauthenticated(error: message);
       return false;
     } catch (e) {
-      print("[DEBUG LOGIN] Errore generico catturato nel controller: $e");
       state = AuthState.unauthenticated(error: e.toString());
       return false;
     }
