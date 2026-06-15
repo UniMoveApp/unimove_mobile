@@ -5,6 +5,7 @@ import '../../features/home/presentation/home_screen.dart';
 import '../../features/rides/presentation/create_ride_screen.dart';
 import '../../features/rides/presentation/search_ride_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/auth/presentation/welcome_routes_screen.dart';
 import '../services/auth_service.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -18,7 +19,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final isGoingToLogin = state.matchedLocation == '/login';
 
       if (!isLoggedIn && !isGoingToLogin) return '/login';
-      if (isLoggedIn && isGoingToLogin) return '/home';
+      if (isLoggedIn && isGoingToLogin) return '/benvenuto';
       return null; // nessun redirect
     },
     routes: [
@@ -41,6 +42,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profilo',
         builder: (_, __) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/benvenuto',
+        builder: (_, __) => const WelcomeRoutesScreen(),
       ),
     ],
   );
