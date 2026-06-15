@@ -8,6 +8,8 @@ class AuthService {
   static const _storage = FlutterSecureStorage();
   static const _tokenKey = 'jwt_token';
 
+  static const _onboardingKey = 'has_completed_onboarding';
+
   /// Salva il token JWT
   Future<void> saveToken(String token) async {
     await _storage.write(key: _tokenKey, value: token);
@@ -21,6 +23,18 @@ class AuthService {
   /// Elimina il token (logout)
   Future<void> deleteToken() async {
     await _storage.delete(key: _tokenKey);
+    await _storage.delete(key: _onboardingKey);
+  }
+
+  /// Salva lo stato di completamento del benvenuto
+  Future<void> setOnboardingCompleted() async {
+    await _storage.write(key: _onboardingKey, value: 'true');
+  }
+
+  /// Verifica se il benvenuto è stato completato
+  Future<bool> isOnboardingCompleted() async {
+    final value = await _storage.read(key: _onboardingKey);
+    return value == 'true';
   }
 
   /// Controlla se l'utente è autenticato e il token non è scaduto

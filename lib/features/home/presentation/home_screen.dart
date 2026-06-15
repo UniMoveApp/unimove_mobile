@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../../shared/widgets/skeleton.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -15,7 +16,6 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   @override
   Widget build(BuildContext context) {
     final userNameAsync = ref.watch(userNameProvider);
-    final userName = userNameAsync.value ?? 'User';
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -35,12 +35,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Ciao $userName',
-                    style: const TextStyle(
-                      fontSize: 24,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.black,
+                  userNameAsync.when(
+                    data: (name) => Text(
+                      'Ciao ${name ?? 'User'}',
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
+                    ),
+                    loading: () => const Row(
+                      children: [
+                        Text(
+                          'Ciao ',
+                          style: TextStyle(
+                            fontSize: 24,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black,
+                          ),
+                        ),
+                        Skeleton(width: 80, height: 24, borderRadius: 6),
+                      ],
+                    ),
+                    error: (_, __) => const Text(
+                      'Ciao User',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.black,
+                      ),
                     ),
                   ),
                   const Text(
@@ -88,7 +111,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                       ),
                       const SizedBox(height: 4),
                       const Text(
-                        'Hai due eventi in programma per domani',
+                        'Hai due eventi in programma per le prossime ore',
                         style: TextStyle(
                           fontSize: 14,
                           color: Colors.black54,
@@ -106,7 +129,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                           elevation: 0,
                           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                         ),
-                        child: const Text('Vedi eventi', style: TextStyle(fontSize: 12)),
+                        child: const Text('Visualizza dettagli', style: TextStyle(fontSize: 12)),
                       ),
                     ],
                   ),
@@ -127,23 +150,219 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           ),
           
           const SizedBox(height: 24),
-          // Qui andrebbe il contenuto della tab selezionata
-          Container(
-            height: 200,
-            width: double.infinity,
-            decoration: BoxDecoration(
-              color: Colors.grey.shade50,
-              borderRadius: BorderRadius.circular(20),
-              border: Border.all(color: Colors.grey.shade100),
+          
+          Text(
+            _getTabName(_currentIndex),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          ),
+          const SizedBox(height: 16),
+          
+          _buildTabContent(),
+          
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildTabContent() {
+    switch (_currentIndex) {
+      case 0:
+        return Column(
+          children: [
+            _buildEventCard(
+              day: '22',
+              month: '01',
+              departure: 'Campobasso',
+              departureTime: '8:30',
+              stops: 'Bojano, Capellette',
+              arrival: 'Pesche - Unimol',
+              arrivalTime: '9:45',
+              actions: [
+                _buildActionButton('Avvia', () {}),
+                _buildActionButton('Elimina', () {}),
+              ],
             ),
-            child: Center(
-              child: Text(
-                'Nessun contenuto in ${_getTabName(_currentIndex)}',
-                style: const TextStyle(color: Colors.black38),
+            _buildEventCard(
+              day: '22',
+              month: '01',
+              departure: 'Campobasso',
+              departureTime: '8:30',
+              stops: 'Bojano, Capellette',
+              arrival: 'Pesche - Unimol',
+              arrivalTime: '9:45',
+              actions: [
+                _buildActionButton('Avvia', () {}),
+                _buildActionButton('Elimina', () {}),
+              ],
+            ),
+          ],
+        );
+      case 1:
+        return Column(
+          children: [
+            _buildEventCard(
+              day: '22',
+              month: '01',
+              departure: 'Campobasso',
+              departureTime: '8:30',
+              stops: 'Bojano, Capellette',
+              arrival: 'Pesche - Unimol',
+              arrivalTime: '9:45',
+              actions: [
+                _buildActionButton('Traccia', () {}),
+                _buildActionButton('Abbandona', () {}),
+              ],
+            ),
+            _buildEventCard(
+              day: '22',
+              month: '01',
+              departure: 'Campobasso',
+              departureTime: '8:30',
+              stops: 'Bojano, Capellette',
+              arrival: 'Pesche - Unimol',
+              arrivalTime: '9:45',
+              actions: [
+                _buildActionButton('Traccia', () {}),
+                _buildActionButton('Abbandona', () {}),
+              ],
+            ),
+          ],
+        );
+      case 2:
+        return Column(
+          children: [
+            _buildEventCard(
+              day: '22',
+              month: '01',
+              departure: 'Campobasso',
+              departureTime: '8:30',
+              stops: 'Bojano, Capellette',
+              arrival: 'Pesche - Unimol',
+              arrivalTime: '9:45',
+              actions: [
+                _buildActionButton('Dona', () {}),
+                _buildActionButton('Recensisci', () {}),
+              ],
+            ),
+            _buildEventCard(
+              day: '22',
+              month: '01',
+              departure: 'Campobasso',
+              departureTime: '8:30',
+              stops: 'Bojano, Capellette',
+              arrival: 'Pesche - Unimol',
+              arrivalTime: '9:45',
+              actions: [
+                _buildActionButton('Dona', () {}),
+                _buildActionButton('Recensisci', () {}),
+              ],
+            ),
+          ],
+        );
+      default:
+        return const SizedBox.shrink();
+    }
+  }
+
+  Widget _buildEventCard({
+    required String day,
+    required String month,
+    required String departure,
+    required String departureTime,
+    required String stops,
+    required String arrival,
+    required String arrivalTime,
+    required List<Widget> actions,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.grey.shade200),
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    day,
+                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
+                  ),
+                  Text(
+                    month,
+                    style: const TextStyle(fontSize: 16, color: Colors.black54),
+                  ),
+                ],
               ),
-            ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    RichText(
+                      text: TextSpan(
+                        style: const TextStyle(color: Colors.black, fontSize: 14),
+                        children: [
+                          const TextSpan(text: 'Partenza: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                          TextSpan(text: '$departure, $departureTime'),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    RichText(
+                      text: TextSpan(
+                        style: const TextStyle(color: Colors.black54, fontSize: 13),
+                        children: [
+                          const TextSpan(text: 'Fermate: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                          TextSpan(text: stops),
+                        ],
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    RichText(
+                      text: TextSpan(
+                        style: const TextStyle(color: Colors.black, fontSize: 14),
+                        children: [
+                          const TextSpan(text: 'Arrivo: ', style: TextStyle(fontWeight: FontWeight.bold)),
+                          TextSpan(text: '$arrival, $arrivalTime'),
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.end,
+            children: actions,
           ),
         ],
+      ),
+    );
+  }
+
+  Widget _buildActionButton(String label, VoidCallback onPressed) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8),
+      child: ElevatedButton(
+        onPressed: onPressed,
+        style: ElevatedButton.styleFrom(
+          backgroundColor: const Color(0xFF2C2C2C),
+          foregroundColor: Colors.white,
+          elevation: 0,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+          minimumSize: const Size(80, 36),
+        ),
+        child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
       ),
     );
   }
@@ -156,10 +375,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
       onTap: () => setState(() => _currentIndex = index),
       child: Container(
         width: (MediaQuery.of(context).size.width - 60) / 3,
-        padding: const EdgeInsets.symmetric(vertical: 20),
+        padding: const EdgeInsets.symmetric(vertical: 24),
         decoration: BoxDecoration(
           color: isSelected ? const Color(0xFFFFEBEE) : Colors.white,
-          borderRadius: BorderRadius.circular(20),
+          borderRadius: BorderRadius.circular(24),
           border: Border.all(
             color: isSelected ? accentColor.withOpacity(0.1) : Colors.grey.shade200,
           ),
@@ -169,13 +388,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
             Icon(
               icon,
               color: isSelected ? accentColor : Colors.black45,
+              size: 28,
             ),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             Text(
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 12,
+                fontSize: 11,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
                 color: isSelected ? accentColor : Colors.black54,
               ),

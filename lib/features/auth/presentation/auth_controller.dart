@@ -9,13 +9,31 @@ enum AuthStatus { authenticated, unauthenticated, loading }
 class AuthState {
   final AuthStatus status;
   final String? errorMessage;
+  final bool isNewLogin;
 
-  AuthState({required this.status, this.errorMessage});
+  AuthState({
+    required this.status,
+    this.errorMessage,
+    this.isNewLogin = false,
+  });
 
-  factory AuthState.authenticated() => AuthState(status: AuthStatus.authenticated);
-  factory AuthState.unauthenticated({String? error}) => 
+  factory AuthState.authenticated({bool isNewLogin = false}) =>
+      AuthState(status: AuthStatus.authenticated, isNewLogin: isNewLogin);
+  factory AuthState.unauthenticated({String? error}) =>
       AuthState(status: AuthStatus.unauthenticated, errorMessage: error);
   factory AuthState.loading() => AuthState(status: AuthStatus.loading);
+
+  AuthState copyWith({
+    AuthStatus? status,
+    String? errorMessage,
+    bool? isNewLogin,
+  }) {
+    return AuthState(
+      status: status ?? this.status,
+      errorMessage: errorMessage ?? this.errorMessage,
+      isNewLogin: isNewLogin ?? this.isNewLogin,
+    );
+  }
 }
 
 final authControllerProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
@@ -53,7 +71,7 @@ class AuthController extends StateNotifier<AuthState> {
         final token = response.data['token'];
         if (token != null) {
           await _authService.saveToken(token);
-          state = AuthState.authenticated();
+          state = AuthState.authenticated(isNewLogin: true);
           return true;
         }
       }
@@ -85,7 +103,7 @@ class AuthController extends StateNotifier<AuthState> {
         final token = response.data['token'];
         if (token != null) {
           await _authService.saveToken(token);
-          state = AuthState.authenticated();
+          state = AuthState.authenticated(isNewLogin: true);
           return true;
         }
       }
@@ -104,6 +122,11 @@ class AuthController extends StateNotifier<AuthState> {
   Future<void> logout() async {
     await _authService.deleteToken();
     state = AuthState.unauthenticated();
+  }
+
+  Future<void> completeWelcome() async {
+    state = state.copyWith(isNewLogin: false);
+    await _authService.setOnboardingCompleted();
   }
 }
 

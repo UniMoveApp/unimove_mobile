@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'auth_controller.dart';
 
 class WelcomeRoutesScreen extends ConsumerStatefulWidget {
   const WelcomeRoutesScreen({super.key});
@@ -146,8 +147,11 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
               const SizedBox(height: 48),
               
               ElevatedButton(
-                onPressed: () {
-                  context.go('/home');
+                onPressed: () async {
+                  await ref.read(authControllerProvider.notifier).completeWelcome();
+                  if (context.mounted) {
+                    context.go('/home');
+                  }
                 },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.black,
@@ -165,8 +169,11 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
               ),
               const SizedBox(height: 12),
               TextButton(
-                onPressed: () {
-                  context.go('/home');
+                onPressed: () async {
+                  await ref.read(authControllerProvider.notifier).completeWelcome();
+                  if (context.mounted) {
+                    context.go('/home');
+                  }
                 },
                 style: TextButton.styleFrom(
                   foregroundColor: Colors.black54,
