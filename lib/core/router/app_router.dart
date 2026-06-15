@@ -9,30 +9,51 @@ import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/auth/presentation/welcome_routes_screen.dart';
 import '../../features/auth/presentation/auth_controller.dart';
 import '../../shared/widgets/main_scaffold.dart';
+import '../services/auth_service.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authState = ref.watch(authControllerProvider);
 
   return GoRouter(
-    initialLocation: '/login',
+    initialLocation: '/splash',
     // AuthGuard reattivo: usa lo stato del controller invece di leggere il disco ogni volta
-    redirect: (context, state) {
-      final isLoggedIn = authState.status == AuthStatus.authenticated;
-      final isGoingToLogin = state.matchedLocation == '/login';
+    redirect: (context, state) async {
+      final status = authState.status;
+      final location = state.matchedLocation;
 
-      // Se non è loggato e non sta andando al login, forzalo al login
-      if (!isLoggedIn && !isGoingToLogin) {
-        return '/login';
+      // Se sta caricando lo stato iniziale della sessione, mantieni l'utente sulla splash screen
+      if (status == AuthStatus.loading) {
+        return '/splash';
       }
 
-      // Se è loggato e prova ad andare al login, mandalo al benvenuto
-      if (isLoggedIn && isGoingToLogin) {
-        return '/benvenuto';
+      final isLoggedIn = status == AuthStatus.authenticated;
+
+      // Se non è loggato e non sta andando al login, forzalo al login
+      if (!isLoggedIn) {
+        if (location != '/login') {
+          return '/login';
+        }
+        return null;
+      }
+
+      // Se l'utente è loggato e si trova su una rotta iniziale (login o splash)
+      if (location == '/login' || location == '/splash') {
+        final completed = await ref.read(authServiceProvider).isOnboardingCompleted();
+        return completed ? '/home' : '/benvenuto';
       }
 
       return null;
     },
     routes: [
+      GoRoute(
+        path: '/splash',
+        builder: (_, __) => const Scaffold(
+          backgroundColor: Colors.white,
+          body: Center(
+            child: CircularProgressIndicator(color: Colors.black),
+          ),
+        ),
+      ),
       GoRoute(
         path: '/login',
         builder: (_, __) => const LoginScreen(),
