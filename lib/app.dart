@@ -11,6 +11,7 @@ class UniMoveApp extends ConsumerWidget {
     final router = ref.watch(appRouterProvider);
     return MaterialApp.router(
       title: 'UniMove',
+      debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       routerConfig: router,
     );
