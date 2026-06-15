@@ -140,7 +140,7 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
                       ),
                     ),
                   );
-                }).toList(),
+                }),
               ],
               
               const SizedBox(height: 48),

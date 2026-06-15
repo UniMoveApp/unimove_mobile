@@ -106,3 +106,19 @@ class AuthController extends StateNotifier<AuthState> {
     state = AuthState.unauthenticated();
   }
 }
+
+final userNameProvider = FutureProvider<String?>((ref) async {
+  final authState = ref.watch(authControllerProvider);
+  if (authState.status != AuthStatus.authenticated) {
+    return null;
+  }
+  try {
+    final apiClient = ref.read(apiClientProvider);
+    final response = await apiClient.dio.get('users/me');
+    final fullName = response.data['fullName'] as String?;
+    if (fullName == null || fullName.trim().isEmpty) return null;
+    return fullName.trim().split(' ').first;
+  } catch (_) {
+    return null;
+  }
+});

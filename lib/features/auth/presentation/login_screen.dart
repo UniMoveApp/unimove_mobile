@@ -128,7 +128,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
                 const SizedBox(height: 32),
                 const Text(
-                  'Bentornato su UniMove',
+                  'Benvenuto su UniMove',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.black,
