@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -42,14 +43,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   }
 
   Future<void> _login() async {
-    print("[DEBUG UI] Bottone Accedi cliccato.");
     if (!_formKey.currentState!.validate()) {
-      print("[DEBUG UI] Validazione del form fallita.");
       return;
     }
 
     if (!_acceptTerms) {
-      print("[DEBUG UI] Termini non accettati. Blocco l'operazione.");
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Accetta i termini e le condizioni per continuare'),
@@ -66,10 +64,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _passwordController.text,
     );
 
-    print("[DEBUG UI] Esito del login: $success");
-    if (!success && mounted) {
+    if (success && mounted) {
+      context.go('/benvenuto');
+    } else if (!success && mounted) {
       final error = ref.read(authControllerProvider).errorMessage;
-      print("[DEBUG UI] Errore mostrato in SnackBar: $error");
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(error ?? 'Credenziali non valide'),

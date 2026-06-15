@@ -5,21 +5,31 @@ import '../../features/home/presentation/home_screen.dart';
 import '../../features/rides/presentation/create_ride_screen.dart';
 import '../../features/rides/presentation/search_ride_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/auth/presentation/welcome_routes_screen.dart';
+import '../../features/auth/presentation/auth_controller.dart';
 import '../services/auth_service.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
-  final authService = ref.watch(authServiceProvider);
+  final authState = ref.watch(authControllerProvider);
 
   return GoRouter(
     initialLocation: '/login',
-    // AuthGuard: redirect globale
-    redirect: (context, state) async {
-      final isLoggedIn = await authService.isAuthenticated();
+    // AuthGuard reattivo: usa lo stato del controller invece di leggere il disco ogni volta
+    redirect: (context, state) {
+      final isLoggedIn = authState.status == AuthStatus.authenticated;
       final isGoingToLogin = state.matchedLocation == '/login';
 
-      if (!isLoggedIn && !isGoingToLogin) return '/login';
-      if (isLoggedIn && isGoingToLogin) return '/home';
-      return null; // nessun redirect
+      // Se non è loggato e non sta andando al login, forzalo al login
+      if (!isLoggedIn && !isGoingToLogin) {
+        return '/login';
+      }
+
+      // Se è loggato e prova ad andare al login, mandalo al benvenuto
+      if (isLoggedIn && isGoingToLogin) {
+        return '/benvenuto';
+      }
+
+      return null;
     },
     routes: [
       GoRoute(
@@ -41,6 +51,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/profilo',
         builder: (_, __) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: '/benvenuto',
+        builder: (_, __) => const WelcomeRoutesScreen(),
       ),
     ],
   );
