@@ -9,6 +9,7 @@ import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/auth/presentation/welcome_routes_screen.dart';
 import '../../features/auth/presentation/auth_controller.dart';
 import '../../shared/widgets/main_scaffold.dart';
+import '../../shared/theme/app_theme.dart';
 import '../services/auth_service.dart';
 
 /// Un Listenable reattivo per notificare GoRouter quando lo stato di autenticazione cambia
@@ -59,20 +60,20 @@ final appRouterProvider = Provider<GoRouter>((ref) {
     routes: [
       GoRoute(
         path: '/splash',
-        builder: (_, __) => const Scaffold(
-          backgroundColor: Colors.white,
+        builder: (context, state) => const Scaffold(
+          backgroundColor: AppColors.deepBlack,
           body: Center(
-            child: CircularProgressIndicator(color: Colors.black),
+            child: CircularProgressIndicator(color: AppColors.universityGreen),
           ),
         ),
       ),
       GoRoute(
         path: '/login',
-        builder: (_, __) => const LoginScreen(),
+        builder: (context, state) => const LoginScreen(),
       ),
       GoRoute(
         path: '/benvenuto',
-        builder: (_, __) => const WelcomeRoutesScreen(),
+        builder: (context, state) => const WelcomeRoutesScreen(),
       ),
       ShellRoute(
         builder: (context, state, child) {
@@ -98,24 +99,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         routes: [
           GoRoute(
             path: '/home',
-            builder: (_, __) => const HomeScreen(),
+            builder: (context, state) => const HomeScreen(),
           ),
           GoRoute(
             path: '/corse/crea',
-            builder: (_, __) => const CreateRideScreen(),
+            builder: (context, state) => const CreateRideScreen(),
           ),
           GoRoute(
             path: '/corse/cerca',
-            builder: (_, __) => const SearchRideScreen(),
+            builder: (context, state) => const SearchRideScreen(),
           ),
           GoRoute(
             path: '/profilo',
-            builder: (_, __) => const ProfileScreen(),
+            builder: (context, state) => const ProfileScreen(),
           ),
           GoRoute(
             path: '/esplora',
-            builder: (_, __) => const Center(
-              child: Text('Esplora', style: TextStyle(color: Colors.black54)),
+            builder: (context, state) => const Center(
+              child: Text('Esplora', style: TextStyle(color: AppColors.textSecondary)),
             ),
           ),
         ],
