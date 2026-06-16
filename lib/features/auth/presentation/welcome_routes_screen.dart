@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../core/services/auth_service.dart';
+import '../../../shared/theme/app_theme.dart';
 
 class WelcomeRoutesScreen extends ConsumerStatefulWidget {
   const WelcomeRoutesScreen({super.key});
@@ -41,7 +42,7 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.deepBlack,
       body: SafeArea(
         child: SingleChildScrollView(
           padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
@@ -53,7 +54,7 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
                 'Benvenuto!',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.black,
+                  color: AppColors.textPrimary,
                   fontSize: 32,
                   fontWeight: FontWeight.bold,
                 ),
@@ -63,7 +64,7 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
                 'Dicci cosa ti interessa. Seleziona le tratte preferite per ricevere notifiche utili e scoprire subito gli eventi più adatti a te.',
                 textAlign: TextAlign.center,
                 style: TextStyle(
-                  color: Colors.black54,
+                  color: AppColors.textSecondary,
                   fontSize: 16,
                   height: 1.5,
                 ),
@@ -73,7 +74,7 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
               const Text(
                 'Inserisci le tratte (max 3)',
                 style: TextStyle(
-                  color: Colors.black54,
+                  color: AppColors.textSecondary,
                   fontSize: 13,
                   fontWeight: FontWeight.w500,
                 ),
@@ -81,23 +82,11 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
               const SizedBox(height: 8),
               TextField(
                 controller: _routeController,
-                style: const TextStyle(color: Colors.black87),
+                style: const TextStyle(color: AppColors.textPrimary),
                 decoration: InputDecoration(
                   hintText: 'Città partenza – Città arrivo',
-                  hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-                  filled: true,
-                  fillColor: Colors.grey.shade100,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: BorderSide(color: Colors.grey.shade200),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(14),
-                    borderSide: const BorderSide(color: Colors.black12, width: 2),
-                  ),
                   suffixIcon: IconButton(
-                    icon: const Icon(Icons.add, color: Colors.black54),
+                    icon: const Icon(Icons.add, color: AppColors.universityGreen),
                     onPressed: _addRoute,
                   ),
                 ),
@@ -109,7 +98,7 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
                 const Text(
                   'Tratte scelte:',
                   style: TextStyle(
-                    color: Colors.black54,
+                    color: AppColors.textSecondary,
                     fontSize: 13,
                     fontWeight: FontWeight.w500,
                   ),
@@ -121,21 +110,21 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
                     child: Container(
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       decoration: BoxDecoration(
-                        color: Colors.grey.shade50,
+                        color: AppColors.surfaceDark,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: Colors.grey.shade200),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                       ),
                       child: Row(
                         children: [
                           Expanded(
                             child: Text(
                               entry.value,
-                              style: const TextStyle(color: Colors.black87, fontSize: 15),
+                              style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
                             ),
                           ),
                           GestureDetector(
                             onTap: () => _removeRoute(entry.key),
-                            child: const Icon(Icons.close, color: Colors.black38, size: 20),
+                            child: const Icon(Icons.close, color: AppColors.universityGreen, size: 20),
                           ),
                         ],
                       ),
@@ -153,15 +142,6 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
                     context.go('/home');
                   }
                 },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: Colors.black,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 18),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  elevation: 0,
-                ),
                 child: const Text(
                   'Conferma',
                   style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16),
@@ -176,7 +156,7 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
                   }
                 },
                 style: TextButton.styleFrom(
-                  foregroundColor: Colors.black54,
+                  foregroundColor: AppColors.textMuted,
                   padding: const EdgeInsets.symmetric(vertical: 18),
                 ),
                 child: const Text(

@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../theme/app_theme.dart';
 
 class MainScaffold extends StatelessWidget {
   final Widget body;
@@ -16,22 +17,21 @@ class MainScaffold extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.deepBlack,
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: AppColors.deepBlack,
         elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.black),
+          icon: const Icon(Icons.menu, color: Colors.white),
           onPressed: () {},
         ),
         title: Text(
           title,
-          style: const TextStyle(color: Colors.black, fontWeight: FontWeight.bold),
+          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
         ),
-        centerTitle: true,
         actions: [
           IconButton(
-            icon: const Icon(Icons.notifications_none_outlined, color: Colors.black),
+            icon: const Icon(Icons.notifications_none_outlined, color: Colors.white),
             onPressed: () {},
           ),
         ],
@@ -40,8 +40,8 @@ class MainScaffold extends StatelessWidget {
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),
         decoration: BoxDecoration(
-          color: Colors.white,
-          border: Border(top: BorderSide(color: Colors.grey.shade200)),
+          color: AppColors.charcoal,
+          border: Border(top: BorderSide(color: Colors.white.withValues(alpha: 0.05))),
         ),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceAround,
@@ -59,7 +59,7 @@ class MainScaffold extends StatelessWidget {
 
   Widget _buildNavItem(BuildContext context, IconData icon, String route, {bool isCenter = false}) {
     bool isActive = currentRoute == route;
-    const accentColor = Color(0xFFE91E63);
+    const accentColor = AppColors.universityGreen;
 
     return GestureDetector(
       onTap: () {
@@ -71,18 +71,20 @@ class MainScaffold extends StatelessWidget {
         padding: const EdgeInsets.all(12),
         decoration: isCenter
             ? const BoxDecoration(
-                color: Colors.black,
+                color: AppColors.universityGreen,
                 shape: BoxShape.circle,
               )
             : isActive
                 ? BoxDecoration(
-                    color: const Color(0xFFFFEBEE),
+                    color: AppColors.universityGreen.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(16),
                   )
-                : null,
+                : const BoxDecoration(
+                    color: Colors.transparent,
+                  ),
         child: Icon(
           icon,
-          color: isCenter ? Colors.white : (isActive ? accentColor : Colors.black54),
+          color: isCenter ? Colors.white : (isActive ? accentColor : AppColors.textMuted),
           size: isCenter ? 30 : 26,
         ),
       ),
