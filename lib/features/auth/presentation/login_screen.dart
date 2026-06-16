@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../shared/theme/app_theme.dart';
 import 'auth_controller.dart';
 
 class LoginScreen extends ConsumerStatefulWidget {
@@ -51,7 +52,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Accetta i termini e le condizioni per continuare'),
-          backgroundColor: Color(0xFF323232),
+          backgroundColor: AppColors.surfaceDark,
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -82,191 +83,182 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     final authState = ref.watch(authControllerProvider);
     final isLoading = authState.status == AuthStatus.loading;
+    final size = MediaQuery.of(context).size;
+    final screenHeight = size.height;
+
+    // Calculate responsive sizes
+    final double logoContainerSize = (screenHeight * 0.22).clamp(120.0, 180.0);
+    final double logoImageSize = logoContainerSize * 0.6;
+    final double verticalPadding = (screenHeight * 0.05).clamp(20.0, 40.0);
+    final double topSpacing = (screenHeight * 0.04).clamp(10.0, 40.0);
 
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: AppColors.deepBlack,
       body: SafeArea(
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 40.0),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.stretch,
-              children: [
-                const SizedBox(height: 20),
-                // Logo UniMove
-                Center(
-                  child: Image.asset(
-                    'assets/images/logo.png',
-                    height: 120,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        width: 100,
-                        height: 100,
-                        decoration: const BoxDecoration(
-                          shape: BoxShape.circle,
-                          gradient: LinearGradient(
-                            colors: [Color(0xFFE91E63), Color(0xFF673AB7)],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                        child: const Center(
-                          child: Text(
-                            'UM',
-                            style: TextStyle(
+        child: LayoutBuilder(
+          builder: (context, constraints) {
+            return SingleChildScrollView(
+              padding: EdgeInsets.symmetric(horizontal: 24.0, vertical: verticalPadding),
+              child: ConstrainedBox(
+                constraints: BoxConstraints(
+                  minHeight: constraints.maxHeight - (verticalPadding * 2),
+                ),
+                child: IntrinsicHeight(
+                  child: Form(
+                    key: _formKey,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                      children: [
+                        SizedBox(height: topSpacing),
+                        // Logo UniMove - Enlarged Circle (Responsive)
+                        Center(
+                          child: Container(
+                            width: logoContainerSize,
+                            height: logoContainerSize,
+                            decoration: const BoxDecoration(
+                              shape: BoxShape.circle,
                               color: Colors.white,
-                              fontSize: 32,
-                              fontWeight: FontWeight.bold,
+                            ),
+                            child: Center(
+                              child: Image.asset(
+                                'assets/images/logo.png',
+                                height: logoImageSize,
+                                fit: BoxFit.contain,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return Text(
+                                    'UM',
+                                    style: TextStyle(
+                                      color: AppColors.charcoal,
+                                      fontSize: logoContainerSize * 0.3,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  );
+                                },
+                              ),
                             ),
                           ),
                         ),
-                      );
-                    },
-                  ),
-                ),
-                const SizedBox(height: 32),
-                const Text(
-                  'Benvenuto su UniMove',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.black,
-                    fontSize: 26,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'Accedi per iniziare il tuo viaggio',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.black54,
-                    fontSize: 16,
-                  ),
-                ),
-                const SizedBox(height: 48),
-
-                _buildLabel('Username'),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _usernameController,
-                  style: const TextStyle(color: Colors.black87),
-                  decoration: _inputDecoration(hintText: 'n.cognome'),
-                ),
-                const SizedBox(height: 20),
-
-                _buildLabel('Password'),
-                const SizedBox(height: 8),
-                TextFormField(
-                  controller: _passwordController,
-                  obscureText: _obscurePassword,
-                  style: const TextStyle(color: Colors.black87),
-                  decoration: _inputDecoration(
-                    hintText: '••••••••',
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword ? Icons.visibility_off : Icons.visibility,
-                        color: Colors.grey,
-                        size: 20,
-                      ),
-                      onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24),
-
-                // Checkbox e Link Termini
-                Row(
-                  children: [
-                    SizedBox(
-                      height: 24,
-                      width: 24,
-                      child: Checkbox(
-                        value: _acceptTerms,
-                        onChanged: (v) => setState(() => _acceptTerms = v ?? false),
-                        activeColor: Colors.black,
-                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: GestureDetector(
-                        onTap: _showTermsAndConditions,
-                        child: const Text.rich(
-                          TextSpan(
-                            text: 'Accetto ',
-                            style: TextStyle(color: Colors.black54, fontSize: 14),
-                            children: [
-                              TextSpan(
-                                text: 'Condizioni d\'Uso e Privacy',
-                                style: TextStyle(
-                                  decoration: TextDecoration.underline,
-                                  color: Colors.black,
-                                  fontWeight: FontWeight.w600,
-                                ),
-                              ),
-                            ],
+                        const SizedBox(height: 24),
+                        const Text(
+                          'UniMove',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.textPrimary,
+                            fontSize: 32,
+                            fontWeight: FontWeight.bold,
+                            letterSpacing: 1.2,
                           ),
                         ),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 40),
+                        const SizedBox(height: 8),
+                        const Text(
+                          'Accedi per iniziare il tuo viaggio',
+                          textAlign: TextAlign.center,
+                          style: TextStyle(
+                            color: AppColors.textSecondary,
+                            fontSize: 16,
+                          ),
+                        ),
+                        const Spacer(), // Pushes the form down if there's space
+                        const SizedBox(height: 32),
 
-                // Bottone Accedi
-                ElevatedButton(
-                  onPressed: isLoading ? null : _login,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: Colors.black,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(16),
+                        _buildLabel('Username'),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _usernameController,
+                          style: const TextStyle(color: AppColors.textPrimary),
+                          decoration: const InputDecoration(hintText: 'n.cognome'),
+                        ),
+                        const SizedBox(height: 20),
+
+                        _buildLabel('Password'),
+                        const SizedBox(height: 8),
+                        TextFormField(
+                          controller: _passwordController,
+                          obscureText: _obscurePassword,
+                          style: const TextStyle(color: AppColors.textPrimary),
+                          decoration: InputDecoration(
+                            hintText: '••••••••',
+                            suffixIcon: IconButton(
+                              icon: Icon(
+                                _obscurePassword ? Icons.visibility_off : Icons.visibility,
+                                color: AppColors.textMuted,
+                                size: 20,
+                              ),
+                              onPressed: () => setState(() => _obscurePassword = !_obscurePassword),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(height: 20),
+
+                        // Checkbox e Link Termini
+                        Row(
+                          children: [
+                            SizedBox(
+                              height: 24,
+                              width: 24,
+                              child: Checkbox(
+                                value: _acceptTerms,
+                                onChanged: (v) => setState(() => _acceptTerms = v ?? false),
+                                activeColor: AppColors.universityGreen,
+                                checkColor: Colors.white,
+                                side: const BorderSide(color: AppColors.textMuted, width: 2),
+                                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(6)),
+                              ),
+                            ),
+                            const SizedBox(width: 12),
+                            Expanded(
+                              child: GestureDetector(
+                                onTap: _showTermsAndConditions,
+                                child: const Text.rich(
+                                  TextSpan(
+                                    text: 'Accetto ',
+                                    style: TextStyle(color: AppColors.textSecondary, fontSize: 14),
+                                    children: [
+                                      TextSpan(
+                                        text: 'Condizioni d\'Uso e Privacy',
+                                        style: TextStyle(
+                                          decoration: TextDecoration.underline,
+                                          color: AppColors.universityGreen,
+                                          fontWeight: FontWeight.w600,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                        const Spacer(), // Pushes everything apart
+                        const SizedBox(height: 32),
+
+                        // Bottone Accedi
+                        ElevatedButton(
+                          onPressed: isLoading ? null : _login,
+                          child: isLoading
+                              ? const SizedBox(
+                                  height: 24,
+                                  width: 24,
+                                  child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
+                                )
+                              : const Text('Accedi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 18)),
+                        ),
+                      ],
                     ),
-                    elevation: 0,
                   ),
-                  child: isLoading
-                      ? const SizedBox(
-                    height: 24,
-                    width: 24,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: Colors.white),
-                  )
-                      : const Text('Accedi', style: TextStyle(fontWeight: FontWeight.bold, fontSize: 16)),
                 ),
-              ],
-            ),
-          ),
+              ),
+            );
+          },
         ),
       ),
     );
-
   }
 
   Widget _buildLabel(String text) {
     return Text(
       text,
-      style: const TextStyle(color: Colors.black54, fontSize: 13, fontWeight: FontWeight.w500),
-    );
-  }
-
-  InputDecoration _inputDecoration({required String hintText, Widget? suffixIcon}) {
-    return InputDecoration(
-      hintText: hintText,
-      hintStyle: TextStyle(color: Colors.grey.shade400, fontSize: 14),
-      filled: true,
-      fillColor: Colors.grey.shade100,
-      contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
-      suffixIcon: suffixIcon,
-      enabledBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: BorderSide(color: Colors.grey.shade200),
-      ),
-      focusedBorder: OutlineInputBorder(
-        borderRadius: BorderRadius.circular(14),
-        borderSide: const BorderSide(color: Colors.black12, width: 2),
-      ),
+      style: const TextStyle(color: AppColors.textSecondary, fontSize: 13, fontWeight: FontWeight.w500),
     );
   }
 }
@@ -285,7 +277,7 @@ class TermsAndConditionsSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       decoration: const BoxDecoration(
-        color: Colors.white,
+        color: AppColors.charcoal,
         borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
       ),
       padding: const EdgeInsets.all(24),
@@ -301,7 +293,7 @@ class TermsAndConditionsSheet extends StatelessWidget {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: Colors.grey[300],
+                color: AppColors.textMuted,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -309,7 +301,7 @@ class TermsAndConditionsSheet extends StatelessWidget {
           const SizedBox(height: 24),
           const Text(
             'Condizioni d\'uso e Privacy',
-            style: TextStyle(color: Colors.black, fontSize: 22, fontWeight: FontWeight.bold),
+            style: TextStyle(color: AppColors.textPrimary, fontSize: 22, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 24),
           const Flexible(
@@ -319,22 +311,22 @@ class TermsAndConditionsSheet extends StatelessWidget {
                 children: [
                   Text(
                     'Privacy dei dati',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                   ),
                   SizedBox(height: 8),
                   Text(
                     'I tuoi dati personali saranno trattati esclusivamente per le finalità legate all\'erogazione del servizio di carpooling UniMove. Garantiamo la massima riservatezza e il rispetto delle normative vigenti sul trattamento dei dati (GDPR). Le informazioni sul tuo profilo e sui viaggi saranno visibili solo agli utenti registrati della community.',
-                    style: TextStyle(fontSize: 15, color: Colors.black54, height: 1.5),
+                    style: TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.5),
                   ),
                   SizedBox(height: 24),
                   Text(
                     'Condizioni d\'uso',
-                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.black87),
+                    style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
                   ),
                   SizedBox(height: 8),
                   Text(
                     'Utilizzando UniMove, accetti di condividere i passaggi in modo responsabile e sicuro. Ti impegni a rispettare gli orari e gli accordi presi con gli altri utenti. UniMove è una piattaforma dedicata agli studenti e al personale universitario per facilitare la mobilità sostenibile. Qualsiasi abuso della piattaforma potrà portare alla sospensione dell\'account.',
-                    style: TextStyle(fontSize: 15, color: Colors.black54, height: 1.5),
+                    style: TextStyle(fontSize: 15, color: AppColors.textSecondary, height: 1.5),
                   ),
                 ],
               ),
@@ -343,21 +335,12 @@ class TermsAndConditionsSheet extends StatelessWidget {
           const SizedBox(height: 32),
           ElevatedButton(
             onPressed: onAccept,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: Colors.black,
-              foregroundColor: Colors.white,
-              minimumSize: const Size(double.infinity, 56),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
-              ),
-              elevation: 0,
-            ),
             child: const Text('Accetta e continua', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
           ),
           const SizedBox(height: 8),
           TextButton(
             onPressed: onDecline,
-            child: const Text('Rifiuta', style: TextStyle(color: Colors.black54, fontWeight: FontWeight.w600)),
+            child: const Text('Rifiuta', style: TextStyle(color: AppColors.textMuted, fontWeight: FontWeight.w600)),
           ),
         ],
       ),

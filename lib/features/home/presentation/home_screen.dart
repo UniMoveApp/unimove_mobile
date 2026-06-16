@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import '../../../shared/theme/app_theme.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../../shared/widgets/skeleton.dart';
 
@@ -10,7 +11,7 @@ class HomeScreen extends ConsumerStatefulWidget {
   ConsumerState<HomeScreen> createState() => _HomeScreenState();
 }
 
-class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProviderStateMixin {
+class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
 
   @override
@@ -26,10 +27,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           // User Header
           Row(
             children: [
-              CircleAvatar(
-                radius: 35,
-                backgroundColor: Colors.grey.shade100,
-                child: const Icon(Icons.person_outline, size: 40, color: Colors.black54),
+              Container(
+                decoration: const BoxDecoration(
+                  shape: BoxShape.circle,
+                  color: AppColors.surfaceDark,
+                ),
+                padding: const EdgeInsets.all(2),
+                child: const CircleAvatar(
+                  radius: 35,
+                  backgroundColor: AppColors.deepBlack,
+                  child: Icon(Icons.person_outline, size: 40, color: AppColors.universityGreen),
+                ),
               ),
               const SizedBox(width: 16),
               Column(
@@ -41,7 +49,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                       style: const TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                     loading: () => const Row(
@@ -51,7 +59,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.black,
+                            color: AppColors.textPrimary,
                           ),
                         ),
                         Skeleton(width: 80, height: 24, borderRadius: 6),
@@ -62,7 +70,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
-                        color: Colors.black,
+                        color: AppColors.textPrimary,
                       ),
                     ),
                   ),
@@ -70,7 +78,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                     'Inizia il tuo viaggio!',
                     style: TextStyle(
                       fontSize: 16,
-                      color: Colors.black54,
+                      color: AppColors.textSecondary,
                     ),
                   ),
                 ],
@@ -83,18 +91,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           Container(
             padding: const EdgeInsets.all(20),
             decoration: BoxDecoration(
-              color: Colors.grey.shade100,
+              color: AppColors.surfaceDark,
               borderRadius: BorderRadius.circular(24),
+              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
             ),
             child: Row(
               children: [
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: Colors.white,
+                    color: AppColors.deepBlack,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.calendar_today_outlined, color: Colors.black),
+                  child: const Icon(Icons.calendar_today_outlined, color: AppColors.universityGreen),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -106,7 +115,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                         style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Colors.black,
+                          color: AppColors.textPrimary,
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -114,22 +123,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
                         'Hai due eventi in programma per le prossime ore',
                         style: TextStyle(
                           fontSize: 14,
-                          color: Colors.black54,
+                          color: AppColors.textSecondary,
                         ),
                       ),
                       const SizedBox(height: 12),
                       ElevatedButton(
                         onPressed: () {},
                         style: ElevatedButton.styleFrom(
-                          backgroundColor: Colors.black,
-                          foregroundColor: Colors.white,
-                          shape: RoundedRectangleBorder(
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          elevation: 0,
-                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          minimumSize: const Size(140, 40),
+                          padding: const EdgeInsets.symmetric(horizontal: 16),
                         ),
-                        child: const Text('Visualizza dettagli', style: TextStyle(fontSize: 12)),
+                        child: const Text('Visualizza dettagli', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
                       ),
                     ],
                   ),
@@ -139,7 +143,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           ),
           const SizedBox(height: 32),
 
-          // Tab Selection (I miei eventi / Prenotazioni / Archivio)
+          // Tab Selection
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -151,13 +155,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
           
           const SizedBox(height: 24),
           
-          Text(
-            _getTabName(_currentIndex),
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                _getTabName(_currentIndex),
+                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+              const SizedBox(height: 16),
+              _buildTabContent(),
+            ],
           ),
-          const SizedBox(height: 16),
-          
-          _buildTabContent(),
           
           const SizedBox(height: 20),
         ],
@@ -179,20 +187,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
               arrival: 'Pesche - Unimol',
               arrivalTime: '9:45',
               actions: [
-                _buildActionButton('Avvia', () {}),
+                _buildActionButton('Avvia', () {}, isPrimary: true),
                 _buildActionButton('Elimina', () {}),
               ],
             ),
             _buildEventCard(
-              day: '22',
+              day: '23',
               month: '01',
-              departure: 'Campobasso',
-              departureTime: '8:30',
-              stops: 'Bojano, Capellette',
-              arrival: 'Pesche - Unimol',
-              arrivalTime: '9:45',
+              departure: 'Isernia',
+              departureTime: '14:15',
+              stops: 'Sesto Campano',
+              arrival: 'Napoli - Università',
+              arrivalTime: '15:45',
               actions: [
-                _buildActionButton('Avvia', () {}),
+                _buildActionButton('Avvia', () {}, isPrimary: true),
                 _buildActionButton('Elimina', () {}),
               ],
             ),
@@ -202,63 +210,26 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
         return Column(
           children: [
             _buildEventCard(
-              day: '22',
+              day: '25',
               month: '01',
-              departure: 'Campobasso',
-              departureTime: '8:30',
-              stops: 'Bojano, Capellette',
-              arrival: 'Pesche - Unimol',
-              arrivalTime: '9:45',
+              departure: 'Venafro',
+              departureTime: '07:30',
+              stops: 'Nessuna',
+              arrival: 'Campobasso - Unimol',
+              arrivalTime: '08:45',
               actions: [
-                _buildActionButton('Traccia', () {}),
-                _buildActionButton('Abbandona', () {}),
-              ],
-            ),
-            _buildEventCard(
-              day: '22',
-              month: '01',
-              departure: 'Campobasso',
-              departureTime: '8:30',
-              stops: 'Bojano, Capellette',
-              arrival: 'Pesche - Unimol',
-              arrivalTime: '9:45',
-              actions: [
-                _buildActionButton('Traccia', () {}),
+                _buildActionButton('Traccia', () {}, isPrimary: true),
                 _buildActionButton('Abbandona', () {}),
               ],
             ),
           ],
         );
       case 2:
-        return Column(
-          children: [
-            _buildEventCard(
-              day: '22',
-              month: '01',
-              departure: 'Campobasso',
-              departureTime: '8:30',
-              stops: 'Bojano, Capellette',
-              arrival: 'Pesche - Unimol',
-              arrivalTime: '9:45',
-              actions: [
-                _buildActionButton('Dona', () {}),
-                _buildActionButton('Recensisci', () {}),
-              ],
-            ),
-            _buildEventCard(
-              day: '22',
-              month: '01',
-              departure: 'Campobasso',
-              departureTime: '8:30',
-              stops: 'Bojano, Capellette',
-              arrival: 'Pesche - Unimol',
-              arrivalTime: '9:45',
-              actions: [
-                _buildActionButton('Dona', () {}),
-                _buildActionButton('Recensisci', () {}),
-              ],
-            ),
-          ],
+        return const Center(
+          child: Padding(
+            padding: EdgeInsets.symmetric(vertical: 40),
+            child: Text('Nessun evento in archivio', style: TextStyle(color: AppColors.textMuted)),
+          ),
         );
       default:
         return const SizedBox.shrink();
@@ -277,69 +248,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
   }) {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: AppColors.surfaceDark,
         borderRadius: BorderRadius.circular(24),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Column(
-                children: [
-                  Text(
-                    day,
-                    style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold),
-                  ),
-                  Text(
-                    month,
-                    style: const TextStyle(fontSize: 16, color: Colors.black54),
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.deepBlack,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      day,
+                      style: const TextStyle(
+                        fontSize: 24, 
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      month,
+                      style: const TextStyle(fontSize: 14, color: AppColors.universityGreen, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ),
               const SizedBox(width: 20),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RichText(
-                      text: TextSpan(
-                        style: const TextStyle(color: Colors.black, fontSize: 14),
-                        children: [
-                          const TextSpan(text: 'Partenza: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                          TextSpan(text: '$departure, $departureTime'),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    RichText(
-                      text: TextSpan(
-                        style: const TextStyle(color: Colors.black54, fontSize: 13),
-                        children: [
-                          const TextSpan(text: 'Fermate: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                          TextSpan(text: stops),
-                        ],
-                      ),
-                    ),
-                    const SizedBox(height: 4),
-                    RichText(
-                      text: TextSpan(
-                        style: const TextStyle(color: Colors.black, fontSize: 14),
-                        children: [
-                          const TextSpan(text: 'Arrivo: ', style: TextStyle(fontWeight: FontWeight.bold)),
-                          TextSpan(text: '$arrival, $arrivalTime'),
-                        ],
-                      ),
-                    ),
+                    _buildRouteInfo('Partenza', '$departure, $departureTime', isBold: true),
+                    const SizedBox(height: 8),
+                    _buildRouteInfo('Fermate', stops, isSmall: true),
+                    const SizedBox(height: 8),
+                    _buildRouteInfo('Arrivo', '$arrival, $arrivalTime', isBold: true),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 20),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: actions,
@@ -349,18 +307,42 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
     );
   }
 
-  Widget _buildActionButton(String label, VoidCallback onPressed) {
+  Widget _buildRouteInfo(String label, String value, {bool isBold = false, bool isSmall = false}) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: isSmall ? AppColors.textMuted : AppColors.universityGreen,
+            letterSpacing: 1,
+          ),
+        ),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: isSmall ? 13 : 15,
+            fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
+            color: isSmall ? AppColors.textSecondary : AppColors.textPrimary,
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton(String label, VoidCallback onPressed, {bool isPrimary = false}) {
     return Padding(
       padding: const EdgeInsets.only(left: 8),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: const Color(0xFF2C2C2C),
+          backgroundColor: isPrimary ? AppColors.universityGreen : AppColors.deepBlack,
           foregroundColor: Colors.white,
-          elevation: 0,
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
           minimumSize: const Size(80, 36),
+          padding: const EdgeInsets.symmetric(horizontal: 16),
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
         child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
       ),
@@ -369,35 +351,32 @@ class _HomeScreenState extends ConsumerState<HomeScreen> with SingleTickerProvid
 
   Widget _buildTabItem(int index, String label, IconData icon) {
     bool isSelected = _currentIndex == index;
-    const accentColor = Color(0xFFE91E63);
     
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       child: Container(
         width: (MediaQuery.of(context).size.width - 60) / 3,
-        padding: const EdgeInsets.symmetric(vertical: 24),
+        padding: const EdgeInsets.symmetric(vertical: 20),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFFFEBEE) : Colors.white,
-          borderRadius: BorderRadius.circular(24),
-          border: Border.all(
-            color: isSelected ? accentColor.withValues(alpha: 0.1) : Colors.grey.shade200,
-          ),
+          color: isSelected ? AppColors.universityGreen : AppColors.surfaceDark,
+          borderRadius: BorderRadius.circular(20),
+          border: isSelected ? null : Border.all(color: Colors.white.withValues(alpha: 0.05)),
         ),
         child: Column(
           children: [
             Icon(
               icon,
-              color: isSelected ? accentColor : Colors.black45,
-              size: 28,
+              color: isSelected ? Colors.white : AppColors.textMuted,
+              size: 24,
             ),
-            const SizedBox(height: 12),
+            const SizedBox(height: 8),
             Text(
               label,
               textAlign: TextAlign.center,
               style: TextStyle(
-                fontSize: 11,
+                fontSize: 10,
                 fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
-                color: isSelected ? accentColor : Colors.black54,
+                color: isSelected ? Colors.white : AppColors.textSecondary,
               ),
             ),
           ],
