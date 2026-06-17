@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/api_client.dart';
 import '../../../core/services/auth_service.dart';
 
+import '../domain/user_profile.dart';
+
 /// Stato dell'autenticazione
 enum AuthStatus { authenticated, unauthenticated, loading }
 
@@ -130,7 +132,7 @@ class AuthController extends StateNotifier<AuthState> {
   }
 }
 
-final userNameProvider = FutureProvider<String?>((ref) async {
+final userProfileProvider = FutureProvider<UserProfile?>((ref) async {
   final authState = ref.watch(authControllerProvider);
   if (authState.status != AuthStatus.authenticated) {
     return null;
@@ -138,10 +140,19 @@ final userNameProvider = FutureProvider<String?>((ref) async {
   try {
     final apiClient = ref.read(apiClientProvider);
     final response = await apiClient.dio.get('users/me');
-    final fullName = response.data['fullName'] as String?;
-    if (fullName == null || fullName.trim().isEmpty) return null;
-    return fullName.trim().split(' ').first;
+    if (response.statusCode == 200 && response.data != null) {
+      return UserProfile.fromJson(response.data as Map<String, dynamic>);
+    }
+    return null;
   } catch (_) {
     return null;
   }
+});
+
+final userNameProvider = FutureProvider<String?>((ref) async {
+  final profile = await ref.watch(userProfileProvider.future);
+  if (profile == null) return null;
+  final fullName = profile.fullName;
+  if (fullName.trim().isEmpty) return null;
+  return fullName.trim().split(' ').first;
 });

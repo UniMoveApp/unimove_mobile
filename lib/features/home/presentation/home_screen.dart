@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../auth/domain/user_profile.dart';
 import '../../../shared/widgets/skeleton.dart';
 
 class HomeScreen extends ConsumerStatefulWidget {
@@ -17,6 +18,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     final userNameAsync = ref.watch(userNameProvider);
+    final userProfileAsync = ref.watch(userProfileProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -163,7 +165,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
               ),
               const SizedBox(height: 16),
-              _buildTabContent(),
+              _buildTabContent(userProfileAsync),
             ],
           ),
           
@@ -173,38 +175,81 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildTabContent() {
+  Widget _buildTabContent(AsyncValue<UserProfile?> userProfileAsync) {
     switch (_currentIndex) {
       case 0:
-        return Column(
-          children: [
-            _buildEventCard(
-              day: '22',
-              month: '01',
-              departure: 'Campobasso',
-              departureTime: '8:30',
-              stops: 'Bojano, Capellette',
-              arrival: 'Pesche - Unimol',
-              arrivalTime: '9:45',
-              actions: [
-                _buildActionButton('Avvia', () {}, isPrimary: true),
-                _buildActionButton('Elimina', () {}),
-              ],
+        return userProfileAsync.when(
+          data: (profile) {
+            final rides = profile?.upcomingRides ?? [];
+            if (rides.isEmpty) {
+              return Center(
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Icon(Icons.directions_car_outlined, size: 64, color: AppColors.textMuted),
+                      const SizedBox(height: 16),
+                      const Text(
+                        'Inizia il tuo viaggio!',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      const SizedBox(height: 8),
+                      const Text(
+                        'Non hai ancora corse programmate.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return Column(
+              children: rides.map((ride) {
+                final day = ride.departureTime.day.toString().padLeft(2, '0');
+                final month = ride.departureTime.month.toString().padLeft(2, '0');
+                final departureTime = '${ride.departureTime.hour.toString().padLeft(2, '0')}:${ride.departureTime.minute.toString().padLeft(2, '0')}';
+                final arrivalTime = '${ride.arrivalTimeEst.hour.toString().padLeft(2, '0')}:${ride.arrivalTimeEst.minute.toString().padLeft(2, '0')}';
+                final stops = ride.hotspots.isEmpty ? 'Nessuna' : ride.hotspots.join(', ');
+
+                return _buildEventCard(
+                  day: day,
+                  month: month,
+                  departure: ride.departureCity,
+                  departureTime: departureTime,
+                  stops: stops,
+                  arrival: ride.arrivalCity,
+                  arrivalTime: arrivalTime,
+                  actions: [
+                    _buildActionButton('Avvia', () {}, isPrimary: true),
+                    _buildActionButton('Elimina', () {}),
+                  ],
+                );
+              }).toList(),
+            );
+          },
+          loading: () => Column(
+            children: [
+              _buildSkeletonEventCard(),
+              _buildSkeletonEventCard(),
+            ],
+          ),
+          error: (err, stack) => Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Text(
+                'Errore nel caricamento delle corse: $err',
+                style: const TextStyle(color: AppColors.textMuted),
+              ),
             ),
-            _buildEventCard(
-              day: '23',
-              month: '01',
-              departure: 'Isernia',
-              departureTime: '14:15',
-              stops: 'Sesto Campano',
-              arrival: 'Napoli - Università',
-              arrivalTime: '15:45',
-              actions: [
-                _buildActionButton('Avvia', () {}, isPrimary: true),
-                _buildActionButton('Elimina', () {}),
-              ],
-            ),
-          ],
+          ),
         );
       case 1:
         return Column(
@@ -234,6 +279,39 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       default:
         return const SizedBox.shrink();
     }
+  }
+
+  Widget _buildSkeletonEventCard() {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Skeleton(width: 50, height: 50, borderRadius: 16),
+          const SizedBox(width: 20),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Skeleton(width: 80, height: 12, borderRadius: 4),
+                const SizedBox(height: 8),
+                const Skeleton(width: 150, height: 16, borderRadius: 4),
+                const SizedBox(height: 16),
+                const Skeleton(width: 80, height: 12, borderRadius: 4),
+                const SizedBox(height: 8),
+                const Skeleton(width: 150, height: 16, borderRadius: 4),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
   }
 
   Widget _buildEventCard({
