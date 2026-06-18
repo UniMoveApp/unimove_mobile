@@ -6,6 +6,7 @@ import '../../features/home/presentation/home_screen.dart';
 import '../../features/rides/presentation/create_ride_screen.dart';
 import '../../features/rides/presentation/search_ride_screen.dart';
 import '../../features/profile/presentation/profile_screen.dart';
+import '../../features/explore/presentation/explore_screen.dart';
 import '../../features/auth/presentation/welcome_routes_screen.dart';
 import '../../features/auth/presentation/auth_controller.dart';
 import '../../shared/widgets/main_scaffold.dart';
@@ -115,9 +116,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           ),
           GoRoute(
             path: '/esplora',
-            builder: (context, state) => const Center(
-              child: Text('Esplora', style: TextStyle(color: AppColors.textSecondary)),
-            ),
+            builder: (context, state) => const ExploreScreen(),
           ),
         ],
       ),

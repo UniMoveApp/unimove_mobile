@@ -1,15 +1,15 @@
 import 'package:flutter/material.dart';
 import '../../../shared/widgets/wip_placeholder.dart';
 
-class ProfileScreen extends StatelessWidget {
-  const ProfileScreen({super.key});
+class ExploreScreen extends StatelessWidget {
+  const ExploreScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return const WipPlaceholder(
-      title: 'Profilo Utente',
+      title: 'Esplora',
       subtitle: 'Work in progress - disponibile nella prossima versione',
-      icon: Icons.person_outline,
+      icon: Icons.map_outlined,
     );
   }
 }

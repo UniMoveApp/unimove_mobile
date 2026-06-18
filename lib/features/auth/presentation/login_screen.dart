@@ -59,7 +59,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       return;
     }
 
-    debugPrint("[DEBUG UI] Avvio chiamata di login tramite AuthController...");
     final success = await ref.read(authControllerProvider.notifier).login(
       _usernameController.text,
       _passwordController.text,

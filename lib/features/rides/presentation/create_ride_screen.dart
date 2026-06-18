@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:dio/dio.dart';
 import '../../../core/services/api_client.dart';
+import '../../../core/data/comuni_molise.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../auth/presentation/auth_controller.dart';
 
@@ -28,6 +29,10 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
   final _hotspot3Controller = TextEditingController();
   final _travelPreferencesController = TextEditingController();
 
+  // FocusNode per Autocomplete
+  final _departureFocusNode = FocusNode();
+  final _arrivalFocusNode = FocusNode();
+
   // Stati interni
   DateTime? _departureDateTime;
   DateTime? _arrivalTimeEstDateTime;
@@ -46,6 +51,8 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
     _hotspot2Controller.dispose();
     _hotspot3Controller.dispose();
     _travelPreferencesController.dispose();
+    _departureFocusNode.dispose();
+    _arrivalFocusNode.dispose();
     super.dispose();
   }
 
@@ -240,31 +247,35 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
                 // Sezione 1: Percorso & Orari
                 _buildSectionTitle('Percorso & Orari'),
                 const SizedBox(height: 12),
-                TextFormField(
+                _buildCityAutocomplete(
+                  label: 'Città di partenza *',
+                  hint: 'Es: Campobasso',
+                  icon: Icons.location_on_outlined,
                   controller: _departureCityController,
-                  decoration: const InputDecoration(
-                    labelText: 'Città di partenza *',
-                    hintText: 'Es: Campobasso',
-                    prefixIcon: Icon(Icons.location_on_outlined, color: AppColors.universityGreen),
-                  ),
+                  focusNode: _departureFocusNode,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Inserisci la città di partenza';
+                    }
+                    if (!comuniMolise.contains(value.trim())) {
+                      return 'Seleziona un comune molisano valido';
                     }
                     return null;
                   },
                 ),
                 const SizedBox(height: 16),
-                TextFormField(
+                _buildCityAutocomplete(
+                  label: 'Città di arrivo *',
+                  hint: 'Es: Termoli',
+                  icon: Icons.flag_outlined,
                   controller: _arrivalCityController,
-                  decoration: const InputDecoration(
-                    labelText: 'Città di arrivo *',
-                    hintText: 'Es: Termoli',
-                    prefixIcon: Icon(Icons.flag_outlined, color: AppColors.universityGreen),
-                  ),
+                  focusNode: _arrivalFocusNode,
                   validator: (value) {
                     if (value == null || value.trim().isEmpty) {
                       return 'Inserisci la città di arrivo';
+                    }
+                    if (!comuniMolise.contains(value.trim())) {
+                      return 'Seleziona un comune molisano valido';
                     }
                     return null;
                   },
@@ -462,6 +473,72 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
         fontWeight: FontWeight.bold,
         color: AppColors.universityGreen,
       ),
+    );
+  }
+
+  Widget _buildCityAutocomplete({
+    required String label,
+    required String hint,
+    required IconData icon,
+    required TextEditingController controller,
+    required FocusNode focusNode,
+    required String? Function(String?) validator,
+  }) {
+    return RawAutocomplete<String>(
+      textEditingController: controller,
+      focusNode: focusNode,
+      optionsBuilder: (TextEditingValue textEditingValue) {
+        if (textEditingValue.text.isEmpty) {
+          return const Iterable<String>.empty();
+        }
+        return comuniMolise.where((String option) {
+          return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+        });
+      },
+      fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
+        return TextFormField(
+          controller: controller,
+          focusNode: focusNode,
+          onFieldSubmitted: (value) => onFieldSubmitted(),
+          decoration: InputDecoration(
+            labelText: label,
+            hintText: hint,
+            prefixIcon: Icon(icon, color: AppColors.universityGreen),
+          ),
+          validator: validator,
+        );
+      },
+      optionsViewBuilder: (context, onSelected, options) {
+        return Align(
+          alignment: Alignment.topLeft,
+          child: Material(
+            elevation: 4.0,
+            color: AppColors.surfaceDark,
+            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+            child: Container(
+              width: MediaQuery.of(context).size.width - 40,
+              constraints: const BoxConstraints(maxHeight: 250),
+              decoration: BoxDecoration(
+                border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
+                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+              ),
+              child: ListView.separated(
+                padding: EdgeInsets.zero,
+                shrinkWrap: true,
+                itemCount: options.length,
+                separatorBuilder: (context, index) => Divider(color: Colors.white.withValues(alpha: 0.05), height: 1),
+                itemBuilder: (BuildContext context, int index) {
+                  final String option = options.elementAt(index);
+                  return ListTile(
+                    title: Text(option, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14)),
+                    onTap: () => onSelected(option),
+                  );
+                },
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

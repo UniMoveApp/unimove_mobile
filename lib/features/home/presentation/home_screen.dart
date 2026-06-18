@@ -182,15 +182,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           data: (profile) {
             final rides = profile?.upcomingRides ?? [];
             if (rides.isEmpty) {
-              return Center(
+              return const Center(
                 child: Padding(
-                  padding: const EdgeInsets.symmetric(vertical: 40),
+                  padding: EdgeInsets.symmetric(vertical: 40),
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      const Icon(Icons.directions_car_outlined, size: 64, color: AppColors.textMuted),
-                      const SizedBox(height: 16),
-                      const Text(
+                      Icon(Icons.directions_car_outlined, size: 64, color: AppColors.textMuted),
+                      SizedBox(height: 16),
+                      Text(
                         'Inizia il tuo viaggio!',
                         style: TextStyle(
                           fontSize: 18,
@@ -198,8 +198,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           color: AppColors.textPrimary,
                         ),
                       ),
-                      const SizedBox(height: 8),
-                      const Text(
+                      SizedBox(height: 8),
+                      Text(
                         'Non hai ancora corse programmate.',
                         style: TextStyle(
                           fontSize: 14,
@@ -281,7 +281,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
-  Widget _buildSkeletonEventCard() {
+  static Widget _buildSkeletonEventCard() {
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
@@ -290,22 +290,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         borderRadius: BorderRadius.circular(24),
         border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
-      child: Row(
+      child: const Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Skeleton(width: 50, height: 50, borderRadius: 16),
-          const SizedBox(width: 20),
+          Skeleton(width: 50, height: 50, borderRadius: 16),
+          SizedBox(width: 20),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Skeleton(width: 80, height: 12, borderRadius: 4),
-                const SizedBox(height: 8),
-                const Skeleton(width: 150, height: 16, borderRadius: 4),
-                const SizedBox(height: 16),
-                const Skeleton(width: 80, height: 12, borderRadius: 4),
-                const SizedBox(height: 8),
-                const Skeleton(width: 150, height: 16, borderRadius: 4),
+                Skeleton(width: 80, height: 12, borderRadius: 4),
+                SizedBox(height: 8),
+                Skeleton(width: 150, height: 16, borderRadius: 4),
+                SizedBox(height: 16),
+                Skeleton(width: 80, height: 12, borderRadius: 4),
+                SizedBox(height: 8),
+                Skeleton(width: 150, height: 16, borderRadius: 4),
               ],
             ),
           ),
