@@ -65,7 +65,7 @@ class UserProfile {
   final String? enrollmentYear;
   final String? studentId;
   final String? avatarUrl;
-  final TravelPreferences? preferences;
+  final String? travelPreferences;
   final String? iban;
   final String? ibanHolder;
   final List<String> favoriteRoutes;
@@ -86,7 +86,7 @@ class UserProfile {
     this.enrollmentYear,
     this.studentId,
     this.avatarUrl,
-    this.preferences,
+    this.travelPreferences,
     this.iban,
     this.ibanHolder,
     required this.favoriteRoutes,
@@ -99,22 +99,42 @@ class UserProfile {
     String? fullName,
     String? email,
     String? role,
+    String? phone,
+    String? gender,
+    String? birthDate,
+    String? university,
+    String? degreeCourse,
+    String? department,
+    String? enrollmentYear,
+    String? studentId,
     String? avatarUrl,
     String? travelPreferences,
     String? iban,
     String? ibanHolder,
+    List<String>? favoriteRoutes,
     List<Ride>? upcomingRides,
+    List<UserReview>? reviews,
   }) {
     return UserProfile(
       username: username ?? this.username,
       fullName: fullName ?? this.fullName,
       email: email ?? this.email,
       role: role ?? this.role,
+      phone: phone ?? this.phone,
+      gender: gender ?? this.gender,
+      birthDate: birthDate ?? this.birthDate,
+      university: university ?? this.university,
+      degreeCourse: degreeCourse ?? this.degreeCourse,
+      department: department ?? this.department,
+      enrollmentYear: enrollmentYear ?? this.enrollmentYear,
+      studentId: studentId ?? this.studentId,
       avatarUrl: avatarUrl ?? this.avatarUrl,
       travelPreferences: travelPreferences ?? this.travelPreferences,
       iban: iban ?? this.iban,
       ibanHolder: ibanHolder ?? this.ibanHolder,
+      favoriteRoutes: favoriteRoutes ?? this.favoriteRoutes,
       upcomingRides: upcomingRides ?? this.upcomingRides,
+      reviews: reviews ?? this.reviews,
     );
   }
 
@@ -133,9 +153,7 @@ class UserProfile {
       enrollmentYear: json['enrollmentYear'] as String?,
       studentId: json['studentId'] as String?,
       avatarUrl: json['avatarUrl'] as String?,
-      preferences: json['travelPreferences'] != null
-          ? TravelPreferences.fromString(json['travelPreferences'] as String)
-          : null,
+      travelPreferences: json['travelPreferences'] as String?,
       iban: json['iban'] as String?,
       ibanHolder: json['ibanHolder'] as String?,
       favoriteRoutes: (json['favoriteRoutes'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
@@ -149,7 +167,6 @@ class UserProfile {
           [],
     );
   }
-  // ... rest of the class
 
   Map<String, dynamic> toJson() {
     return {
@@ -162,7 +179,7 @@ class UserProfile {
       'department': department,
       'enrollmentYear': enrollmentYear,
       'studentId': studentId,
-      'travelPreferences': preferences?.toString(),
+      'travelPreferences': travelPreferences,
       'iban': iban,
       'ibanHolder': ibanHolder,
       'favoriteRoutes': favoriteRoutes,
