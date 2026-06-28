@@ -39,7 +39,7 @@ class SettingsScreen extends ConsumerWidget {
               icon: Icons.alt_route_outlined,
               label: 'Preferenze tratte',
               onTap: () {
-                // Navigazione futura
+                context.push('/profilo/edit-routes');
               },
             ),
             _buildDivider(),
