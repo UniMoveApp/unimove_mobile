@@ -39,6 +39,13 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
   int _totalSeats = 4;
   bool _isLoading = false;
 
+  // Travel preferences booleans (true = Yes, false = No)
+  bool _music = true;
+  bool _talk = true;
+  bool _animals = false;
+  bool _smoke = false;
+  bool _ac = true;
+
   @override
   void dispose() {
     _departureCityController.dispose();
@@ -123,6 +130,8 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
         hotspots.add(_hotspot3Controller.text.trim());
       }
 
+      final travelPrefsStr = 'music:${_music ? 2 : 0},talk:${_talk ? 2 : 0},animals:${_animals ? 2 : 0},smoke:${_smoke ? 2 : 0},ac:${_ac ? 2 : 0}|${_travelPreferencesController.text.trim()}';
+
       final requestData = {
         'departureCity': _departureCityController.text.trim(),
         'departureTime': _departureDateTime!.toIso8601String().split('.').first,
@@ -132,7 +141,7 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
         'vehicleModel': _vehicleModelController.text.trim().isEmpty ? null : _vehicleModelController.text.trim(),
         'vehiclePlate': _vehiclePlateController.text.trim().isEmpty ? null : _vehiclePlateController.text.trim(),
         'totalSeats': _totalSeats,
-        'travelPreferences': _travelPreferencesController.text.trim().isEmpty ? null : _travelPreferencesController.text.trim(),
+        'travelPreferences': travelPrefsStr,
       };
 
       final apiClient = ref.read(apiClientProvider);
@@ -422,12 +431,42 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
                 // Sezione 4: Note aggiuntive
                 _buildSectionTitle('Altre informazioni'),
                 const SizedBox(height: 12),
+                const Text(
+                  'Preferenze di viaggio',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w500,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    _buildPreferenceToggleBox(Icons.music_note_outlined, _music, () {
+                      setState(() => _music = !_music);
+                    }),
+                    _buildPreferenceToggleBox(Icons.forum_outlined, _talk, () {
+                      setState(() => _talk = !_talk);
+                    }),
+                    _buildPreferenceToggleBox(Icons.pets_outlined, _animals, () {
+                      setState(() => _animals = !_animals);
+                    }),
+                    _buildPreferenceToggleBox(Icons.smoking_rooms_outlined, _smoke, () {
+                      setState(() => _smoke = !_smoke);
+                    }),
+                    _buildPreferenceToggleBox(Icons.ac_unit_outlined, _ac, () {
+                      setState(() => _ac = !_ac);
+                    }),
+                  ],
+                ),
+                const SizedBox(height: 16),
                 TextFormField(
                   controller: _travelPreferencesController,
                   maxLines: 3,
                   decoration: const InputDecoration(
-                    labelText: 'Preferenze di viaggio (Opzionale)',
-                    hintText: 'Es: No fumo, musica rock, bagaglio piccolo consentito...',
+                    labelText: 'Note aggiuntive (Opzionale)',
+                    hintText: 'Es: musica rock, bagaglio piccolo consentito...',
                   ),
                 ),
                 const SizedBox(height: 32),
@@ -472,6 +511,29 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
         fontSize: 16,
         fontWeight: FontWeight.bold,
         color: AppColors.universityGreen,
+      ),
+    );
+  }
+
+  Widget _buildPreferenceToggleBox(IconData icon, bool isActive, VoidCallback onTap) {
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
+        width: 50,
+        height: 50,
+        decoration: BoxDecoration(
+          color: isActive ? AppColors.universityGreen.withValues(alpha: 0.15) : AppColors.surfaceDark,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isActive ? AppColors.universityGreen : Colors.white.withValues(alpha: 0.05),
+            width: isActive ? 1.5 : 1,
+          ),
+        ),
+        child: Icon(
+          icon,
+          color: isActive ? AppColors.universityGreen : AppColors.textMuted,
+          size: 24,
+        ),
       ),
     );
   }
