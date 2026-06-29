@@ -4,6 +4,19 @@ import '../../../shared/theme/app_theme.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../auth/domain/user_profile.dart';
 import '../../../shared/widgets/skeleton.dart';
+import '../../profile/presentation/reviews_controller.dart';
+import 'leave_review_dialog.dart';
+import '../../../core/services/api_client.dart';
+
+final archivedRidesProvider = FutureProvider<List<Ride>>((ref) async {
+  final apiClient = ref.watch(apiClientProvider);
+  final response = await apiClient.dio.get('rides/archive');
+  if (response.statusCode == 200 && response.data != null) {
+    final list = response.data as List<dynamic>;
+    return list.map((e) => Ride.fromJson(e as Map<String, dynamic>)).toList();
+  }
+  throw Exception('Impossibile caricare l\'archivio delle corse');
+});
 
 class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
@@ -270,10 +283,62 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ],
         );
       case 2:
-        return const Center(
-          child: Padding(
-            padding: EdgeInsets.symmetric(vertical: 40),
-            child: Text('Nessun evento in archivio', style: TextStyle(color: AppColors.textMuted)),
+        final archivedRidesAsync = ref.watch(archivedRidesProvider);
+        final profileAsync = ref.watch(userProfileProvider);
+        
+        return archivedRidesAsync.when(
+          data: (rides) {
+            if (rides.isEmpty) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Text(
+                    'Nessun evento in archivio',
+                    style: TextStyle(color: AppColors.textMuted),
+                  ),
+                ),
+              );
+            }
+            
+            final profile = profileAsync.value;
+            final String myUsername = profile?.username ?? '';
+
+            return Column(
+              children: rides.map((ride) {
+                final day = ride.departureTime.day.toString().padLeft(2, '0');
+                final month = ride.departureTime.month.toString().padLeft(2, '0');
+                final departureTime = '${ride.departureTime.hour.toString().padLeft(2, '0')}:${ride.departureTime.minute.toString().padLeft(2, '0')}';
+                final arrivalTime = '${ride.arrivalTimeEst.hour.toString().padLeft(2, '0')}:${ride.arrivalTimeEst.minute.toString().padLeft(2, '0')}';
+                final stops = ride.hotspots.isEmpty ? 'Nessuna' : ride.hotspots.join(', ');
+
+                final isPassenger = ride.driverUsername != myUsername;
+
+                return _buildArchivedRideCard(
+                  ride: ride,
+                  day: day,
+                  month: month,
+                  departureTime: departureTime,
+                  arrivalTime: arrivalTime,
+                  stops: stops,
+                  isPassenger: isPassenger,
+                );
+              }).toList(),
+            );
+          },
+          loading: () => Column(
+            children: [
+              _buildSkeletonEventCard(),
+              _buildSkeletonEventCard(),
+            ],
+          ),
+          error: (err, stack) => Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Text(
+                'Errore nel caricamento dell\'archivio: $err',
+                style: const TextStyle(color: AppColors.textMuted),
+              ),
+            ),
           ),
         );
       default:
@@ -470,5 +535,142 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       case 2: return 'Archivio';
       default: return '';
     }
+  }
+
+  Widget _buildArchivedRideCard({
+    required Ride ride,
+    required String day,
+    required String month,
+    required String departureTime,
+    required String arrivalTime,
+    required String stops,
+    required bool isPassenger,
+  }) {
+    return Container(
+      margin: const EdgeInsets.only(bottom: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+      ),
+      child: Column(
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                decoration: BoxDecoration(
+                  color: AppColors.deepBlack,
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                child: Column(
+                  children: [
+                    Text(
+                      day,
+                      style: const TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                    Text(
+                      month,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.universityGreen,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 20),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    _buildRouteInfo('Partenza', '${ride.departureCity}, $departureTime', isBold: true),
+                    const SizedBox(height: 8),
+                    _buildRouteInfo('Fermate', stops, isSmall: true),
+                    const SizedBox(height: 8),
+                    _buildRouteInfo('Arrivo', '${ride.arrivalCity}, $arrivalTime', isBold: true),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Container(
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: isPassenger
+                      ? Colors.blue.withValues(alpha: 0.15)
+                      : AppColors.universityGreen.withValues(alpha: 0.15),
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: Text(
+                  isPassenger ? 'Passeggero' : 'Conducente',
+                  style: TextStyle(
+                    color: isPassenger ? Colors.blue[300] : AppColors.universityGreen,
+                    fontSize: 11,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+              if (isPassenger)
+                Consumer(
+                  builder: (context, ref, child) {
+                    final isReviewedAsync = ref.watch(isRideReviewedProvider((
+                      rideId: ride.id,
+                      driverUsername: ride.driverUsername
+                    )));
+                    
+                    return isReviewedAsync.when(
+                      data: (isReviewed) {
+                        if (isReviewed) {
+                          return const Text(
+                            'Recensito',
+                            style: TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 13,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          );
+                        } else {
+                          return _buildActionButton('Recensisci', () {
+                            LeaveReviewDialog.show(
+                              context,
+                              rideId: ride.id,
+                              driverName: ride.driverFullName,
+                              driverUsername: ride.driverUsername,
+                              onSubmitted: () {
+                                ref.invalidate(archivedRidesProvider);
+                              },
+                            );
+                          }, isPrimary: true);
+                        }
+                      },
+                      loading: () => const SizedBox(
+                        width: 16,
+                        height: 16,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: AppColors.universityGreen,
+                        ),
+                      ),
+                      error: (_, __) => const Text('Errore'),
+                    );
+                  },
+                ),
+            ],
+          ),
+        ],
+      ),
+    );
   }
 }

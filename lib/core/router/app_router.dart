@@ -9,6 +9,7 @@ import '../../features/profile/presentation/profile_screen.dart';
 import '../../features/profile/presentation/edit_personal_info_screen.dart';
 import '../../features/profile/presentation/edit_preferences_screen.dart';
 import '../../features/profile/presentation/edit_iban_screen.dart';
+import '../../features/profile/presentation/edit_routes_screen.dart';
 import '../../features/profile/presentation/settings_screen.dart';
 import '../../features/explore/presentation/explore_screen.dart';
 import '../../features/auth/presentation/welcome_routes_screen.dart';
@@ -131,6 +132,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
               GoRoute(
                 path: 'edit-iban',
                 builder: (context, state) => const EditIbanScreen(),
+              ),
+              GoRoute(
+                path: 'edit-routes',
+                builder: (context, state) => const EditRoutesScreen(),
               ),
             ],
           ),

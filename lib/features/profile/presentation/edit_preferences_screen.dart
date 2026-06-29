@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../auth/presentation/auth_controller.dart';
+import '../../auth/domain/user_profile.dart';
 import 'profile_controller.dart';
 
 class EditPreferencesScreen extends ConsumerStatefulWidget {
@@ -12,30 +13,28 @@ class EditPreferencesScreen extends ConsumerStatefulWidget {
 }
 
 class _EditPreferencesScreenState extends ConsumerState<EditPreferencesScreen> {
-  late final TextEditingController _preferencesController;
+  PreferenceLevel _music = PreferenceLevel.neutral;
+  PreferenceLevel _talk = PreferenceLevel.neutral;
+  PreferenceLevel _animals = PreferenceLevel.neutral;
+  PreferenceLevel _smoke = PreferenceLevel.neutral;
+  PreferenceLevel _ac = PreferenceLevel.neutral;
+
   bool _isSaving = false;
   bool _initialized = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _preferencesController = TextEditingController();
-  }
-
-  @override
-  void dispose() {
-    _preferencesController.dispose();
-    super.dispose();
-  }
 
   @override
   Widget build(BuildContext context) {
     final userProfileAsync = ref.watch(userProfileProvider);
 
-    // Inizializza il controller di testo con il valore corrente
     userProfileAsync.whenData((profile) {
       if (!_initialized && profile != null) {
-        _preferencesController.text = profile.travelPreferences ?? '';
+        final prefs = TravelPreferences.fromString(profile.travelPreferences ?? '');
+        _music = prefs.music == PreferenceLevel.dislike ? PreferenceLevel.dislike : PreferenceLevel.like;
+        _talk = prefs.talk == PreferenceLevel.dislike ? PreferenceLevel.dislike : PreferenceLevel.like;
+        _animals = prefs.animals == PreferenceLevel.dislike ? PreferenceLevel.dislike : PreferenceLevel.like;
+        // Ripristiniamo la logica diretta (Sì = fumo consentito, No = fumo non consentito)
+        _smoke = prefs.smoke == PreferenceLevel.like ? PreferenceLevel.like : PreferenceLevel.dislike;
+        _ac = prefs.ac == PreferenceLevel.dislike ? PreferenceLevel.dislike : PreferenceLevel.like;
         _initialized = true;
       }
     });
@@ -73,43 +72,76 @@ class _EditPreferencesScreenState extends ConsumerState<EditPreferencesScreen> {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Inserisci le tue preferenze di viaggio (es. musica a bordo, fumo, bagagli, orari). Saranno visibili agli altri passeggeri e conducenti.',
+                  'Imposta le tue preferenze per definire come preferisci viaggiare. Saranno visualizzate sul tuo profilo e condivise con passeggeri e conducenti.',
                   style: TextStyle(
                     fontSize: 14,
                     color: AppColors.textSecondary,
+                    height: 1.4,
                   ),
                 ),
                 const SizedBox(height: 32),
 
-                // Text field
-                const Text(
-                  'PREFERENZE DI VIAGGIO',
-                  style: TextStyle(
-                    fontSize: 11,
-                    fontWeight: FontWeight.bold,
-                    color: AppColors.universityGreen,
-                    letterSpacing: 1.2,
-                  ),
+                // 1. Musica
+                _buildPreferenceRow(
+                  title: 'Musica a bordo',
+                  subtitle: 'Ti piace ascoltare musica durante la corsa?',
+                  icon: Icons.music_note_outlined,
+                  currentValue: _music,
+                  onChanged: (val) => setState(() => _music = val),
                 ),
-                const SizedBox(height: 10),
-                TextField(
-                  controller: _preferencesController,
-                  maxLines: 6,
-                  style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
-                  decoration: InputDecoration(
-                    hintText: 'Es. Non fumo in auto, preferisco musica rock. Ho spazio per bagagli di medie dimensioni...',
-                    alignLabelWithHint: true,
-                    enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: Colors.white10),
-                    ),
-                    focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(16),
-                      borderSide: const BorderSide(color: AppColors.universityGreen, width: 2),
-                    ),
-                  ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20.0),
+                  child: Divider(color: Colors.white10),
                 ),
-                const SizedBox(height: 40),
+
+                // 2. Conversazione
+                _buildPreferenceRow(
+                  title: 'Chiacchiere / Conversazione',
+                  subtitle: 'Ti piace fare conversazione o preferisci il silenzio?',
+                  icon: Icons.forum_outlined,
+                  currentValue: _talk,
+                  onChanged: (val) => setState(() => _talk = val),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20.0),
+                  child: Divider(color: Colors.white10),
+                ),
+
+                // 3. Animali
+                _buildPreferenceRow(
+                  title: 'Animali domestici',
+                  subtitle: 'Accetti animali domestici a bordo del veicolo?',
+                  icon: Icons.pets_outlined,
+                  currentValue: _animals,
+                  onChanged: (val) => setState(() => _animals = val),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20.0),
+                  child: Divider(color: Colors.white10),
+                ),
+
+                // 4. Fumo
+                _buildPreferenceRow(
+                  title: 'Fumo a bordo',
+                  subtitle: 'Accetti che si possa fumare a bordo?',
+                  icon: Icons.smoking_rooms_outlined,
+                  currentValue: _smoke,
+                  onChanged: (val) => setState(() => _smoke = val),
+                ),
+                const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 20.0),
+                  child: Divider(color: Colors.white10),
+                ),
+
+                // 5. Aria condizionata
+                _buildPreferenceRow(
+                  title: 'Aria condizionata',
+                  subtitle: 'Preferisci viaggiare con l\'aria condizionata attiva?',
+                  icon: Icons.ac_unit_outlined,
+                  currentValue: _ac,
+                  onChanged: (val) => setState(() => _ac = val),
+                ),
+                const SizedBox(height: 48),
 
                 // Save button
                 SizedBox(
@@ -131,10 +163,11 @@ class _EditPreferencesScreenState extends ConsumerState<EditPreferencesScreen> {
                           )
                         : const Text(
                             'Salva modifiche',
-                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                            style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                           ),
                   ),
                 ),
+                const SizedBox(height: 24),
               ],
             ),
           );
@@ -155,11 +188,104 @@ class _EditPreferencesScreenState extends ConsumerState<EditPreferencesScreen> {
     );
   }
 
+  Widget _buildPreferenceRow({
+    required String title,
+    required String subtitle,
+    required IconData icon,
+    required PreferenceLevel currentValue,
+    required ValueChanged<PreferenceLevel> onChanged,
+  }) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Icon(icon, color: AppColors.universityGreen, size: 24),
+            const SizedBox(width: 12),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    subtitle,
+                    style: const TextStyle(
+                      fontSize: 13,
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 16),
+        Row(
+          children: [
+            Expanded(child: _buildOptionButton('No', PreferenceLevel.dislike, currentValue, onChanged)),
+            const SizedBox(width: 16),
+            Expanded(child: _buildOptionButton('Sì', PreferenceLevel.like, currentValue, onChanged)),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildOptionButton(
+    String label,
+    PreferenceLevel value,
+    PreferenceLevel currentValue,
+    ValueChanged<PreferenceLevel> onChanged,
+  ) {
+    final isSelected = currentValue == value;
+    return GestureDetector(
+      onTap: _isSaving ? null : () => onChanged(value),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 12),
+        decoration: BoxDecoration(
+          color: isSelected ? AppColors.universityGreen : Colors.transparent,
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(
+            color: isSelected ? AppColors.universityGreen : Colors.white.withValues(alpha: 0.1),
+            width: isSelected ? 1.5 : 1,
+          ),
+        ),
+        child: Text(
+          label,
+          textAlign: TextAlign.center,
+          style: TextStyle(
+            fontSize: 14,
+            fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
+            color: isSelected ? Colors.white : AppColors.textSecondary,
+          ),
+        ),
+      ),
+    );
+  }
+
   Future<void> _savePreferences() async {
     setState(() => _isSaving = true);
+    
+    final travelPrefsStr = TravelPreferences(
+      music: _music,
+      talk: _talk,
+      animals: _animals,
+      smoke: _smoke,
+      ac: _ac,
+    ).toString();
+
     final success = await ref
         .read(profileControllerProvider.notifier)
-        .updatePreferences(_preferencesController.text);
+        .updatePreferences(travelPrefsStr);
+        
     setState(() => _isSaving = false);
 
     if (mounted) {

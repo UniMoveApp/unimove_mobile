@@ -192,21 +192,24 @@ class TravelPreferences {
   final PreferenceLevel talk;
   final PreferenceLevel animals;
   final PreferenceLevel smoke;
+  final PreferenceLevel ac;
 
   TravelPreferences({
     this.music = PreferenceLevel.neutral,
     this.talk = PreferenceLevel.neutral,
     this.animals = PreferenceLevel.neutral,
     this.smoke = PreferenceLevel.neutral,
+    this.ac = PreferenceLevel.neutral,
   });
 
   factory TravelPreferences.fromString(String prefStr) {
-    // Expected format: "music:1,talk:2,animals:0,smoke:0" or similar
+    // Expected format: "music:1,talk:2,animals:0,smoke:0,ac:1" or similar
     final parts = prefStr.split(',');
     PreferenceLevel music = PreferenceLevel.neutral;
     PreferenceLevel talk = PreferenceLevel.neutral;
     PreferenceLevel animals = PreferenceLevel.neutral;
     PreferenceLevel smoke = PreferenceLevel.neutral;
+    PreferenceLevel ac = PreferenceLevel.neutral;
 
     for (var part in parts) {
       final kv = part.split(':');
@@ -218,14 +221,15 @@ class TravelPreferences {
         if (key == 'talk') talk = level;
         if (key == 'animals') animals = level;
         if (key == 'smoke') smoke = level;
+        if (key == 'ac') ac = level;
       }
     }
-    return TravelPreferences(music: music, talk: talk, animals: animals, smoke: smoke);
+    return TravelPreferences(music: music, talk: talk, animals: animals, smoke: smoke, ac: ac);
   }
 
   @override
   String toString() {
-    return 'music:${music.value},talk:${talk.value},animals:${animals.value},smoke:${smoke.value}';
+    return 'music:${music.value},talk:${talk.value},animals:${animals.value},smoke:${smoke.value},ac:${ac.value}';
   }
 }
 
@@ -246,11 +250,13 @@ class UserReview {
 
   factory UserReview.fromJson(Map<String, dynamic> json) {
     return UserReview(
-      authorName: json['authorName'] as String? ?? 'Utente Anonimo',
+      authorName: json['reviewerFullName'] as String? ?? json['authorName'] as String? ?? 'Utente Anonimo',
       authorAvatar: json['authorAvatar'] as String?,
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       comment: json['comment'] as String? ?? '',
-      date: json['date'] != null ? DateTime.parse(json['date'] as String) : DateTime.now(),
+      date: json['createdAt'] != null
+          ? DateTime.parse(json['createdAt'] as String)
+          : (json['date'] != null ? DateTime.parse(json['date'] as String) : DateTime.now()),
     );
   }
 }

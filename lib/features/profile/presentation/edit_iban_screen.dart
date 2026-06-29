@@ -71,7 +71,7 @@ class _EditIbanScreenState extends ConsumerState<EditIbanScreen> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Dati per i rimborsi',
+                    'Donazioni volontarie',
                     style: TextStyle(
                       fontSize: 22,
                       fontWeight: FontWeight.bold,
@@ -80,7 +80,7 @@ class _EditIbanScreenState extends ConsumerState<EditIbanScreen> {
                   ),
                   const SizedBox(height: 8),
                   const Text(
-                    'Inserisci il tuo IBAN per consentire agli altri utenti di rimborsarti le spese di viaggio.',
+                    'Inserisci il tuo IBAN per consentire agli altri utenti di inviarti donazioni volontarie.',
                     style: TextStyle(
                       fontSize: 14,
                       color: AppColors.textSecondary,
