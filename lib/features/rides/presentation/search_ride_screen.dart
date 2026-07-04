@@ -8,6 +8,7 @@ import '../../../shared/theme/app_theme.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../auth/domain/user_profile.dart';
 import '../../../shared/widgets/skeleton.dart';
+import 'my_bookings_controller.dart';
 
 class SearchRideScreen extends ConsumerStatefulWidget {
   const SearchRideScreen({super.key});
@@ -332,8 +333,9 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                                   if (!context.mounted) return;
 
                                   if (response.statusCode == 200 || response.statusCode == 201) {
-                                    // Refresh user profile upcoming rides & reviews
+                                    // Refresh user profile upcoming rides, bookings & reviews
                                     ref.invalidate(userProfileProvider);
+                                    ref.invalidate(myBookingsProvider);
                                     Navigator.pop(context); // Close bottom sheet
 
                                     // Show success dialog

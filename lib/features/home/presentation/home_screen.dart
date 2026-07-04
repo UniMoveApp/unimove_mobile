@@ -8,6 +8,7 @@ import '../../profile/presentation/reviews_controller.dart';
 import 'leave_review_dialog.dart';
 import '../../../core/services/api_client.dart';
 import '../../rides/presentation/my_rides_controller.dart';
+import '../../rides/presentation/my_bookings_controller.dart';
 
 final archivedRidesProvider = FutureProvider<List<Ride>>((ref) async {
   final apiClient = ref.watch(apiClientProvider);
@@ -29,6 +30,7 @@ class HomeScreen extends ConsumerStatefulWidget {
 class _HomeScreenState extends ConsumerState<HomeScreen> {
   int _currentIndex = 0;
   String? _activeActionRideId;
+  String? _activeBookingActionId;
 
   Future<void> _handleStartRide(Ride ride) async {
     setState(() => _activeActionRideId = ride.id);
@@ -150,6 +152,78 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       }
     } finally {
       if (mounted) setState(() => _activeActionRideId = null);
+    }
+  }
+
+  Future<void> _handleCancelBooking(PassengerBooking booking) async {
+    final ride = booking.ride;
+    final isRideInProgress = ride?.status == 'IN_PROGRESS';
+    final actionName = isRideInProgress ? 'Abbandona Corsa' : 'Cancella Prenotazione';
+    final actionVerb = isRideInProgress ? 'abbandonare' : 'cancellare';
+
+    final confirm = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: AppColors.surfaceDark,
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(20),
+          side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+        ),
+        title: Row(
+          children: [
+            const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 28),
+            const SizedBox(width: 10),
+            Text(actionName, style: const TextStyle(color: AppColors.textPrimary)),
+          ],
+        ),
+        content: Text(
+          'Sei sicuro di voler $actionVerb la tua prenotazione${ride != null ? " per la corsa da ${ride.departureCity} a ${ride.arrivalCity}" : ""}?\n\n'
+          '${isRideInProgress ? "Stai per abbandonare una corsa attualmente in corso." : "Nota: le prenotazioni non possono essere cancellate se mancano meno di 24 ore dalla partenza."}',
+          style: const TextStyle(color: AppColors.textSecondary),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Annulla', style: TextStyle(color: AppColors.textMuted)),
+          ),
+          ElevatedButton(
+            style: ElevatedButton.styleFrom(
+              backgroundColor: Colors.redAccent,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            onPressed: () => Navigator.of(context).pop(true),
+            child: Text(isRideInProgress ? 'Abbandona' : 'Cancella', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirm != true) return;
+
+    setState(() => _activeBookingActionId = booking.id);
+    try {
+      await ref.read(myBookingsServiceProvider).cancelBooking(booking.id);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(isRideInProgress ? 'Corsa abbandonata.' : 'Prenotazione cancellata con successo.'),
+            backgroundColor: AppColors.universityGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _activeBookingActionId = null);
     }
   }
 
@@ -380,22 +454,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
         );
       case 1:
-        return Column(
-          children: [
-            _buildEventCard(
-              day: '25',
-              month: '01',
-              departure: 'Venafro',
-              departureTime: '07:30',
-              stops: 'Nessuna',
-              arrival: 'Campobasso - Unimol',
-              arrivalTime: '08:45',
-              actions: [
-                _buildActionButton('Traccia', () {}, isPrimary: true),
-                _buildActionButton('Abbandona', () {}),
-              ],
+        final myBookingsAsync = ref.watch(myBookingsProvider);
+        return myBookingsAsync.when(
+          data: (bookings) {
+            if (bookings.isEmpty) {
+              return const Center(
+                child: Padding(
+                  padding: EdgeInsets.symmetric(vertical: 40),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.assignment_outlined, size: 64, color: AppColors.textMuted),
+                      SizedBox(height: 16),
+                      Text(
+                        'Nessuna prenotazione attiva',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Cerca una corsa disponibile e prenota il tuo posto!',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              );
+            }
+            return Column(
+              children: bookings.map((b) => _buildPassengerBookingCard(b)).toList(),
+            );
+          },
+          loading: () => Column(
+            children: [
+              _buildSkeletonEventCard(),
+              _buildSkeletonEventCard(),
+            ],
+          ),
+          error: (err, stack) => Center(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(vertical: 40),
+              child: Column(
+                children: [
+                  Text(
+                    'Errore nel caricamento delle prenotazioni: $err',
+                    style: const TextStyle(color: AppColors.textMuted),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () => ref.invalidate(myBookingsProvider),
+                    child: const Text('Riprova'),
+                  ),
+                ],
+              ),
             ),
-          ],
+          ),
         );
       case 2:
         final archivedRidesAsync = ref.watch(archivedRidesProvider);
@@ -654,16 +774,31 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildEventCard({
-    required String day,
-    required String month,
-    required String departure,
-    required String departureTime,
-    required String stops,
-    required String arrival,
-    required String arrivalTime,
-    required List<Widget> actions,
-  }) {
+  Widget _buildPassengerBookingCard(PassengerBooking booking) {
+    final ride = booking.ride;
+    final isActionLoading = _activeBookingActionId == booking.id;
+
+    final departureTime = ride != null
+        ? '${ride.departureTime.hour.toString().padLeft(2, '0')}:${ride.departureTime.minute.toString().padLeft(2, '0')}'
+        : '--:--';
+    final arrivalTime = ride != null
+        ? '${ride.arrivalTimeEst.hour.toString().padLeft(2, '0')}:${ride.arrivalTimeEst.minute.toString().padLeft(2, '0')}'
+        : '--:--';
+    final day = ride != null
+        ? ride.departureTime.day.toString().padLeft(2, '0')
+        : (booking.createdAt != null ? booking.createdAt!.day.toString().padLeft(2, '0') : '--');
+    final month = ride != null
+        ? ride.departureTime.month.toString().padLeft(2, '0')
+        : (booking.createdAt != null ? booking.createdAt!.month.toString().padLeft(2, '0') : '--');
+
+    final departureCity = ride?.departureCity ?? 'Partenza non specificata';
+    final arrivalCity = ride?.arrivalCity ?? 'Arrivo non specificato';
+    final driverName = ride?.driverFullName.isNotEmpty == true ? ride!.driverFullName : null;
+    final hotspot = booking.hotspotChosen ?? 'Non specificato';
+
+    final isRideInProgress = ride?.status == 'IN_PROGRESS';
+    final buttonLabel = isRideInProgress ? 'Abbandona' : 'Cancella';
+
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       padding: const EdgeInsets.all(20),
@@ -673,6 +808,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -688,14 +824,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Text(
                       day,
                       style: const TextStyle(
-                        fontSize: 24, 
+                        fontSize: 24,
                         fontWeight: FontWeight.bold,
                         color: AppColors.textPrimary,
                       ),
                     ),
                     Text(
                       month,
-                      style: const TextStyle(fontSize: 14, color: AppColors.universityGreen, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                        fontSize: 14,
+                        color: AppColors.universityGreen,
+                        fontWeight: FontWeight.bold,
+                      ),
                     ),
                   ],
                 ),
@@ -705,20 +845,67 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildRouteInfo('Partenza', '$departure, $departureTime', isBold: true),
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Expanded(
+                          child: _buildRouteInfo('Partenza', '$departureCity, $departureTime', isBold: true),
+                        ),
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: (isRideInProgress ? Colors.orange : AppColors.universityGreen).withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(8),
+                          ),
+                          child: Text(
+                            isRideInProgress ? 'In corso' : 'Prenotata',
+                            style: TextStyle(
+                              color: isRideInProgress ? Colors.orange : AppColors.universityGreen,
+                              fontSize: 11,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                     const SizedBox(height: 8),
-                    _buildRouteInfo('Fermate', stops, isSmall: true),
+                    _buildRouteInfo('Punto di Incontro', hotspot, isSmall: true),
                     const SizedBox(height: 8),
-                    _buildRouteInfo('Arrivo', '$arrival, $arrivalTime', isBold: true),
+                    _buildRouteInfo('Arrivo', '$arrivalCity, $arrivalTime', isBold: true),
+                    if (driverName != null) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.person_outline, size: 14, color: AppColors.textMuted),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Guidatore: $driverName',
+                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 16),
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
-            children: actions,
+            children: [
+              if (isActionLoading)
+                const SizedBox(
+                  width: 24,
+                  height: 24,
+                  child: CircularProgressIndicator(
+                    strokeWidth: 2,
+                    color: AppColors.universityGreen,
+                  ),
+                )
+              else
+                _buildActionButton(buttonLabel, () => _handleCancelBooking(booking)),
+            ],
           ),
         ],
       ),
