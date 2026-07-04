@@ -527,9 +527,28 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               return const Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
-                  child: Text(
-                    'Nessun evento in archivio',
-                    style: TextStyle(color: AppColors.textMuted),
+                  child: Column(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Icon(Icons.archive_outlined, size: 64, color: AppColors.textMuted),
+                      SizedBox(height: 16),
+                      Text(
+                        'Nessun evento in archivio',
+                        style: TextStyle(
+                          fontSize: 18,
+                          fontWeight: FontWeight.bold,
+                          color: AppColors.textPrimary,
+                        ),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Le corse completate a cui hai partecipato appariranno qui.',
+                        style: TextStyle(
+                          fontSize: 14,
+                          color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               );
@@ -569,9 +588,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           error: (err, stack) => Center(
             child: Padding(
               padding: const EdgeInsets.symmetric(vertical: 40),
-              child: Text(
-                'Errore nel caricamento dell\'archivio: $err',
-                style: const TextStyle(color: AppColors.textMuted),
+              child: Column(
+                children: [
+                  Text(
+                    'Errore nel caricamento dell\'archivio: $err',
+                    style: const TextStyle(color: AppColors.textMuted),
+                    textAlign: TextAlign.center,
+                  ),
+                  const SizedBox(height: 12),
+                  ElevatedButton(
+                    onPressed: () => ref.invalidate(archivedRidesProvider),
+                    child: const Text('Riprova'),
+                  ),
+                ],
               ),
             ),
           ),
@@ -1058,6 +1087,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     _buildRouteInfo('Fermate', stops, isSmall: true),
                     const SizedBox(height: 8),
                     _buildRouteInfo('Arrivo', '${ride.arrivalCity}, $arrivalTime', isBold: true),
+                    if (isPassenger && ride.driverFullName.isNotEmpty) ...[
+                      const SizedBox(height: 8),
+                      Row(
+                        children: [
+                          const Icon(Icons.person_outline, size: 14, color: AppColors.textMuted),
+                          const SizedBox(width: 4),
+                          Text(
+                            'Guidatore: ${ride.driverFullName}',
+                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),
@@ -1095,13 +1137,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     return isReviewedAsync.when(
                       data: (isReviewed) {
                         if (isReviewed) {
-                          return const Text(
-                            'Recensito',
-                            style: TextStyle(
-                              color: AppColors.textMuted,
-                              fontSize: 13,
-                              fontWeight: FontWeight.bold,
-                            ),
+                          return const Row(
+                            children: [
+                              Icon(Icons.check_circle, size: 14, color: AppColors.universityGreen),
+                              SizedBox(width: 4),
+                              Text(
+                                'Recensito',
+                                style: TextStyle(
+                                  color: AppColors.textMuted,
+                                  fontSize: 13,
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ],
                           );
                         } else {
                           return _buildActionButton('Recensisci', () {
@@ -1125,7 +1173,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           color: AppColors.universityGreen,
                         ),
                       ),
-                      error: (_, __) => const Text('Errore'),
+                      error: (_, __) => const Text('Errore', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
                     );
                   },
                 ),
