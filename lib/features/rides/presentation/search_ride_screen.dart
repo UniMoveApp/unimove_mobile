@@ -907,6 +907,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                         Text(
                           '@${ride.driverUsername}',
@@ -914,6 +916,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                             color: AppColors.textMuted,
                             fontSize: 12,
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ],
                     ),
@@ -931,6 +935,7 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -1094,19 +1099,25 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      _buildCardPreferenceIcon(Icons.music_note_outlined, ridePrefs['music']!),
-                      const SizedBox(width: 6),
-                      _buildCardPreferenceIcon(Icons.forum_outlined, ridePrefs['talk']!),
-                      const SizedBox(width: 6),
-                      _buildCardPreferenceIcon(Icons.pets_outlined, ridePrefs['animals']!),
-                      const SizedBox(width: 6),
-                      _buildCardPreferenceIcon(Icons.smoking_rooms_outlined, ridePrefs['smoke']!),
-                      const SizedBox(width: 6),
-                      _buildCardPreferenceIcon(Icons.ac_unit_outlined, ridePrefs['ac']!),
-                    ],
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildCardPreferenceIcon(Icons.music_note_outlined, ridePrefs['music']!),
+                          const SizedBox(width: 6),
+                          _buildCardPreferenceIcon(Icons.forum_outlined, ridePrefs['talk']!),
+                          const SizedBox(width: 6),
+                          _buildCardPreferenceIcon(Icons.pets_outlined, ridePrefs['animals']!),
+                          const SizedBox(width: 6),
+                          _buildCardPreferenceIcon(Icons.smoking_rooms_outlined, ridePrefs['smoke']!),
+                          const SizedBox(width: 6),
+                          _buildCardPreferenceIcon(Icons.ac_unit_outlined, ridePrefs['ac']!),
+                        ],
+                      ),
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: () => _openBookingSheet(ride),
                     style: ElevatedButton.styleFrom(

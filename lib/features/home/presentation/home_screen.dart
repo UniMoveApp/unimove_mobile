@@ -173,7 +173,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 28),
             const SizedBox(width: 10),
-            Text(actionName, style: const TextStyle(color: AppColors.textPrimary)),
+            Expanded(
+              child: Text(
+                actionName,
+                style: const TextStyle(color: AppColors.textPrimary),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         content: Text(
@@ -907,9 +913,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           const Icon(Icons.person_outline, size: 14, color: AppColors.textMuted),
                           const SizedBox(width: 4),
-                          Text(
-                            'Guidatore: $driverName',
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          Expanded(
+                            child: Text(
+                              'Guidatore: $driverName',
+                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                         ],
                       ),
@@ -961,6 +971,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             color: isSmall ? AppColors.textSecondary : AppColors.textPrimary,
           ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
         ),
       ],
     );
