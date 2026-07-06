@@ -1,3 +1,4 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/services/api_client.dart';
@@ -29,6 +30,16 @@ class ReviewsController extends StateNotifier<AsyncValue<void>> {
       }
       throw Exception('Errore durante l\'invio della recensione');
     } catch (e, stack) {
+      if (e is DioException && e.response?.data != null) {
+        final data = e.response?.data;
+        if (data is Map && data['message'] != null) {
+          state = AsyncValue.error(data['message'].toString(), stack);
+          return false;
+        } else if (data is String && data.isNotEmpty) {
+          state = AsyncValue.error(data, stack);
+          return false;
+        }
+      }
       state = AsyncValue.error(e, stack);
       return false;
     }
@@ -53,7 +64,9 @@ final isRideReviewedProvider = FutureProvider.family<bool, ({String rideId, Stri
       // Controlla se esiste una recensione per la corsa specifica scritta dall'utente loggato
       return list.any((review) =>
           review['rideId'] == arg.rideId &&
-          review['reviewerUsername'] == userProfile.username);
+          (review['reviewerUsername'] == userProfile.username ||
+           review['authorName'] == userProfile.fullName ||
+           review['reviewerFullName'] == userProfile.fullName));
     }
   } catch (e) {
     debugPrint('Errore nella verifica della recensione per la corsa ${arg.rideId}: $e');

@@ -51,6 +51,14 @@ class _LeaveReviewDialogState extends ConsumerState<LeaveReviewDialog> {
   final _commentController = TextEditingController();
   bool _isSubmitting = false;
 
+  final Map<int, String> _ratingLabels = {
+    1: 'Molto scarso',
+    2: 'Scarso',
+    3: 'Sufficiente',
+    4: 'Buono',
+    5: 'Eccellente!',
+  };
+
   @override
   void dispose() {
     _commentController.dispose();
@@ -58,6 +66,7 @@ class _LeaveReviewDialogState extends ConsumerState<LeaveReviewDialog> {
   }
 
   Future<void> _submitReview() async {
+    if (_isSubmitting) return;
     setState(() => _isSubmitting = true);
 
     final success = await ref.read(reviewsControllerProvider.notifier).leaveReview(
@@ -69,14 +78,21 @@ class _LeaveReviewDialogState extends ConsumerState<LeaveReviewDialog> {
     if (mounted) {
       setState(() => _isSubmitting = false);
       if (success) {
-        // Forza il refresh del provider di verifica recensione e del profilo
+        // Forza il refresh del provider di verifica recensione, del profilo e dell'archivio
         ref.invalidate(isRideReviewedProvider((rideId: widget.rideId, driverUsername: widget.driverUsername)));
         ref.invalidate(userProfileProvider);
         
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
-            content: Text('Recensione inviata con successo!'),
+            content: Row(
+              children: [
+                Icon(Icons.check_circle_outline, color: Colors.white),
+                SizedBox(width: 10),
+                Text('Recensione inviata con successo!'),
+              ],
+            ),
             backgroundColor: AppColors.universityGreen,
+            behavior: SnackBarBehavior.floating,
           ),
         );
         Navigator.of(context).pop();
@@ -85,16 +101,24 @@ class _LeaveReviewDialogState extends ConsumerState<LeaveReviewDialog> {
         String errorMessage = 'Errore durante l\'invio della recensione';
         if (errorState is AsyncError) {
           final error = errorState.error;
-          if (error.toString().contains('Hai gia recensito')) {
+          final errorStr = error.toString();
+          if (errorStr.contains('gia recensito') || errorStr.contains('già recensito')) {
             errorMessage = 'Hai già recensito questa corsa';
           } else {
-            errorMessage = error.toString().replaceAll('Exception:', '').trim();
+            errorMessage = errorStr.replaceAll('Exception:', '').trim();
           }
         }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(errorMessage),
+            content: Row(
+              children: [
+                const Icon(Icons.error_outline, color: Colors.white),
+                const SizedBox(width: 10),
+                Expanded(child: Text(errorMessage)),
+              ],
+            ),
             backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
           ),
         );
       }
@@ -147,7 +171,7 @@ class _LeaveReviewDialogState extends ConsumerState<LeaveReviewDialog> {
             ),
             textAlign: TextAlign.center,
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 24),
 
           // Interactive Stars Row
           Row(
@@ -170,19 +194,33 @@ class _LeaveReviewDialogState extends ConsumerState<LeaveReviewDialog> {
               );
             }),
           ),
-          const SizedBox(height: 28),
+          const SizedBox(height: 8),
+
+          // Rating textual label
+          Text(
+            _ratingLabels[_rating] ?? '',
+            style: const TextStyle(
+              color: AppColors.universityGreen,
+              fontWeight: FontWeight.bold,
+              fontSize: 14,
+            ),
+            textAlign: TextAlign.center,
+          ),
+          const SizedBox(height: 24),
 
           // Optional Comment Text Field
           TextField(
             controller: _commentController,
             maxLines: 4,
+            maxLength: 500,
             enabled: !_isSubmitting,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 16),
+            style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
             decoration: InputDecoration(
               hintText: 'Scrivi un commento opzionale...',
               hintStyle: const TextStyle(color: AppColors.textMuted),
               fillColor: AppColors.deepBlack,
               filled: true,
+              counterStyle: const TextStyle(color: AppColors.textMuted),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(16),
                 borderSide: const BorderSide(color: Colors.white10),
@@ -193,7 +231,7 @@ class _LeaveReviewDialogState extends ConsumerState<LeaveReviewDialog> {
               ),
             ),
           ),
-          const SizedBox(height: 32),
+          const SizedBox(height: 24),
 
           // Send Button
           ElevatedButton(
