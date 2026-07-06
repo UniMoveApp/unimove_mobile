@@ -8,6 +8,10 @@ import '../../home/presentation/home_screen.dart';
 // Il backend supporta ?status= su GET /rides/my
 // Richiediamo separatamente OPEN e IN_PROGRESS per avere solo le corse attive
 final myRidesProvider = FutureProvider<List<Ride>>((ref) async {
+  // Guard: non effettuare chiamate API se l'utente non è autenticato
+  final authState = ref.watch(authControllerProvider);
+  if (authState.status != AuthStatus.authenticated) return [];
+
   final apiClient = ref.watch(apiClientProvider);
   final responses = await Future.wait([
     apiClient.dio.get('rides/my', queryParameters: {'status': 'OPEN'}),

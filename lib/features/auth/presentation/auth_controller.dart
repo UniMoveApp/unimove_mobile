@@ -145,13 +145,14 @@ class AuthController extends StateNotifier<AuthState> {
 
   Future<void> logout() async {
     await _authService.deleteToken();
-    // Invalida tutti i provider legati all'utente per evitare che
-    // i dati del vecchio account vengano mostrati al nuovo utente
+    // Imposta PRIMA lo stato unauthenticated: il router fa redirect verso /login
+    // e smette di watchare tutti i provider della home. Solo poi li invalidiamo
+    // per evitare che si ricostruiscano con token null (→ 401 DioException).
+    state = AuthState.unauthenticated();
     _ref.invalidate(profileControllerProvider);
     _ref.invalidate(myRidesProvider);
     _ref.invalidate(myBookingsProvider);
     _ref.invalidate(archivedRidesProvider);
-    state = AuthState.unauthenticated();
   }
 
   Future<void> completeWelcome() async {

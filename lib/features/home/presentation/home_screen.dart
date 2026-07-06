@@ -11,6 +11,10 @@ import '../../rides/presentation/my_rides_controller.dart';
 import '../../rides/presentation/my_bookings_controller.dart';
 
 final archivedRidesProvider = FutureProvider<List<Ride>>((ref) async {
+  // Guard: non effettuare chiamate API se l'utente non è autenticato
+  final authState = ref.watch(authControllerProvider);
+  if (authState.status != AuthStatus.authenticated) return [];
+
   final apiClient = ref.watch(apiClientProvider);
   final response = await apiClient.dio.get('rides/archive');
   if (response.statusCode == 200 && response.data != null) {

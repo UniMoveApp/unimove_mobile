@@ -55,6 +55,10 @@ class PassengerBooking {
 }
 
 final myBookingsProvider = FutureProvider<List<PassengerBooking>>((ref) async {
+  // Guard: non effettuare chiamate API se l'utente non è autenticato
+  final authState = ref.watch(authControllerProvider);
+  if (authState.status != AuthStatus.authenticated) return [];
+
   final apiClient = ref.watch(apiClientProvider);
 
   // 1. Fetch passenger bookings
