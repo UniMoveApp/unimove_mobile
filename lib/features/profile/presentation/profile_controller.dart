@@ -86,3 +86,18 @@ final profileControllerProvider = StateNotifierProvider<ProfileController, Async
   final apiClient = ref.watch(apiClientProvider);
   return ProfileController(apiClient);
 });
+
+final userReviewsProvider = FutureProvider.family<List<UserReview>, String>((ref, userIdOrUsername) async {
+  final apiClient = ref.watch(apiClientProvider);
+  try {
+    final response = await apiClient.dio.get('reviews/user/$userIdOrUsername');
+    if (response.statusCode == 200 && response.data != null) {
+      return (response.data as List<dynamic>)
+          .map((e) => UserReview.fromJson(e as Map<String, dynamic>))
+          .toList();
+    }
+  } catch (e) {
+    debugPrint('Errore nel recupero recensioni per $userIdOrUsername: $e');
+  }
+  return [];
+});

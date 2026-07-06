@@ -78,14 +78,46 @@ class ProfileScreen extends ConsumerWidget {
                   // Star rating centered under role
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(5, (index) {
-                      final isFilled = index < averageRating.round();
-                      return Icon(
-                        isFilled ? Icons.star : Icons.star_border,
-                        color: isFilled ? AppColors.universityGreen : Colors.white24,
-                        size: 22,
-                      );
-                    }),
+                    children: [
+                      Row(
+                        children: List.generate(5, (index) {
+                          if (averageRating >= index + 1) {
+                            return const Icon(Icons.star, color: AppColors.universityGreen, size: 20);
+                          } else if (averageRating >= index + 0.5) {
+                            return const Icon(Icons.star_half, color: AppColors.universityGreen, size: 20);
+                          } else {
+                            return const Icon(Icons.star_border, color: Colors.white24, size: 20);
+                          }
+                        }),
+                      ),
+                      const SizedBox(width: 8),
+                      if (profile.reviews.isNotEmpty) ...[
+                        Text(
+                          averageRating.toStringAsFixed(1),
+                          style: const TextStyle(
+                            color: AppColors.textPrimary,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 15,
+                          ),
+                        ),
+                        const SizedBox(width: 4),
+                        Text(
+                          '(${profile.reviews.length} ${profile.reviews.length == 1 ? "recensione" : "recensioni"})',
+                          style: const TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ] else ...[
+                        const Text(
+                          'Nessuna recensione',
+                          style: TextStyle(
+                            color: AppColors.textMuted,
+                            fontSize: 13,
+                          ),
+                        ),
+                      ],
+                    ],
                   ),
                   const SizedBox(height: 32),
 
@@ -184,24 +216,81 @@ class ProfileScreen extends ConsumerWidget {
                   ),
                   const SizedBox(height: 32),
 
-                  // Reviews Title (Centered)
-                  const Text(
-                    'Recensioni',
-                    style: TextStyle(
-                      fontSize: 18,
-                      fontWeight: FontWeight.bold,
-                      color: AppColors.textPrimary,
-                    ),
+                  // Reviews Header Section
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Row(
+                        children: [
+                          Icon(Icons.rate_review_outlined, color: AppColors.universityGreen, size: 20),
+                          SizedBox(width: 8),
+                          Text(
+                            'Recensioni ricevute',
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontWeight: FontWeight.bold,
+                              color: AppColors.textPrimary,
+                            ),
+                          ),
+                        ],
+                      ),
+                      if (profile.reviews.isNotEmpty)
+                        Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          decoration: BoxDecoration(
+                            color: AppColors.universityGreen.withValues(alpha: 0.15),
+                            borderRadius: BorderRadius.circular(12),
+                            border: Border.all(color: AppColors.universityGreen.withValues(alpha: 0.3)),
+                          ),
+                          child: Text(
+                            '${profile.reviews.length}',
+                            style: const TextStyle(
+                              color: AppColors.universityGreen,
+                              fontWeight: FontWeight.bold,
+                              fontSize: 12,
+                            ),
+                          ),
+                        ),
+                    ],
                   ),
                   const SizedBox(height: 16),
 
                   // Reviews List
                   if (profile.reviews.isEmpty)
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: 24.0),
-                      child: Text(
-                        'Nessuna recensione ricevuta',
-                        style: TextStyle(color: AppColors.textMuted, fontStyle: FontStyle.italic),
+                    Container(
+                      width: double.infinity,
+                      padding: const EdgeInsets.symmetric(vertical: 32.0, horizontal: 20.0),
+                      decoration: BoxDecoration(
+                        color: AppColors.surfaceDark,
+                        borderRadius: BorderRadius.circular(20),
+                        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+                      ),
+                      child: Column(
+                        children: [
+                          Icon(
+                            Icons.star_outline_rounded,
+                            color: AppColors.textMuted.withValues(alpha: 0.5),
+                            size: 48,
+                          ),
+                          const SizedBox(height: 12),
+                          const Text(
+                            'Nessuna recensione ricevuta',
+                            style: TextStyle(
+                              color: AppColors.textPrimary,
+                              fontWeight: FontWeight.w600,
+                              fontSize: 15,
+                            ),
+                          ),
+                          const SizedBox(height: 4),
+                          const Text(
+                            'Le valutazioni e le recensioni lasciate dagli altri utenti appariranno qui.',
+                            style: TextStyle(
+                              color: AppColors.textMuted,
+                              fontSize: 13,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ],
                       ),
                     )
                   else
@@ -220,71 +309,111 @@ class ProfileScreen extends ConsumerWidget {
                             border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
                           ),
                           padding: const EdgeInsets.all(16.0),
-                          child: Row(
+                          child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              // Colored avatar circular
-                              CircleAvatar(
-                                radius: 20,
-                                backgroundColor: _getAvatarColor(review.authorName),
-                                child: Text(
-                                  review.authorName.isNotEmpty ? review.authorName[0].toUpperCase() : 'U',
-                                  style: const TextStyle(
-                                    color: Colors.black87,
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 16,
+                              Row(
+                                children: [
+                                  // Reviewer Avatar
+                                  if (review.authorAvatar != null && review.authorAvatar!.isNotEmpty)
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundImage: NetworkImage(review.authorAvatar!),
+                                    )
+                                  else
+                                    CircleAvatar(
+                                      radius: 20,
+                                      backgroundColor: _getAvatarColor(review.authorName),
+                                      child: Text(
+                                        review.authorName.isNotEmpty ? review.authorName[0].toUpperCase() : 'U',
+                                        style: const TextStyle(
+                                          color: Colors.black87,
+                                          fontWeight: FontWeight.bold,
+                                          fontSize: 16,
+                                        ),
+                                      ),
+                                    ),
+                                  const SizedBox(width: 12),
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          review.authorName,
+                                          style: const TextStyle(
+                                            color: AppColors.textPrimary,
+                                            fontSize: 15,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                        if (review.reviewerUsername != null && review.reviewerUsername!.isNotEmpty) ...[
+                                          const SizedBox(height: 2),
+                                          Text(
+                                            '@${review.reviewerUsername}',
+                                            style: const TextStyle(
+                                              color: AppColors.textMuted,
+                                              fontSize: 12,
+                                            ),
+                                          ),
+                                        ],
+                                      ],
+                                    ),
+                                  ),
+                                  Text(
+                                    _formatDate(review.date),
+                                    style: const TextStyle(
+                                      color: AppColors.textMuted,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              const SizedBox(height: 12),
+                              // Star rating bar
+                              Row(
+                                children: [
+                                  Row(
+                                    children: List.generate(5, (starIndex) {
+                                      final isFilled = starIndex < review.rating;
+                                      return Icon(
+                                        isFilled ? Icons.star : Icons.star_border,
+                                        color: isFilled ? AppColors.universityGreen : Colors.white24,
+                                        size: 16,
+                                      );
+                                    }),
+                                  ),
+                                  const SizedBox(width: 6),
+                                  Text(
+                                    '${review.rating.toInt()}/5',
+                                    style: const TextStyle(
+                                      color: AppColors.universityGreen,
+                                      fontWeight: FontWeight.w600,
+                                      fontSize: 12,
+                                    ),
+                                  ),
+                                ],
+                              ),
+                              if (review.comment.isNotEmpty) ...[
+                                const SizedBox(height: 10),
+                                Container(
+                                  width: double.infinity,
+                                  padding: const EdgeInsets.all(12),
+                                  decoration: BoxDecoration(
+                                    color: AppColors.deepBlack.withValues(alpha: 0.5),
+                                    borderRadius: BorderRadius.circular(12),
+                                    border: Border.all(color: Colors.white.withValues(alpha: 0.03)),
+                                  ),
+                                  child: Text(
+                                    review.comment,
+                                    style: const TextStyle(
+                                      color: AppColors.textSecondary,
+                                      fontSize: 14,
+                                      height: 1.4,
+                                      fontStyle: FontStyle.italic,
+                                    ),
                                   ),
                                 ),
-                              ),
-                              const SizedBox(width: 16),
-                              Expanded(
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Text(
-                                      'da ${review.authorName}',
-                                      style: const TextStyle(
-                                        color: AppColors.textPrimary,
-                                        fontSize: 15,
-                                        fontWeight: FontWeight.bold,
-                                      ),
-                                    ),
-                                    const SizedBox(height: 4),
-                                    Row(
-                                      children: List.generate(5, (starIndex) {
-                                        final isFilled = starIndex < review.rating;
-                                        return Icon(
-                                          isFilled ? Icons.star : Icons.star_border,
-                                          color: isFilled ? AppColors.universityGreen : Colors.white24,
-                                          size: 14,
-                                        );
-                                      }),
-                                    ),
-                                    if (review.comment.isNotEmpty) ...[
-                                      const SizedBox(height: 8),
-                                      Text(
-                                        review.comment,
-                                        style: const TextStyle(
-                                          color: AppColors.textSecondary,
-                                          fontSize: 14,
-                                          height: 1.4,
-                                        ),
-                                      ),
-                                    ],
-                                    const SizedBox(height: 4),
-                                    Align(
-                                      alignment: Alignment.bottomRight,
-                                      child: Text(
-                                        _formatDate(review.date),
-                                        style: const TextStyle(
-                                          color: AppColors.textMuted,
-                                          fontSize: 11,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
+                              ],
                             ],
                           ),
                         );

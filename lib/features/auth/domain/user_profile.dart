@@ -234,6 +234,9 @@ class TravelPreferences {
 }
 
 class UserReview {
+  final String? id;
+  final String? rideId;
+  final String? reviewerUsername;
   final String authorName;
   final String? authorAvatar;
   final double rating;
@@ -241,6 +244,9 @@ class UserReview {
   final DateTime date;
 
   UserReview({
+    this.id,
+    this.rideId,
+    this.reviewerUsername,
     required this.authorName,
     this.authorAvatar,
     required this.rating,
@@ -249,8 +255,24 @@ class UserReview {
   });
 
   factory UserReview.fromJson(Map<String, dynamic> json) {
+    final reviewerFullName = json['reviewerFullName'] as String?;
+    final authorName = json['authorName'] as String?;
+    final reviewerUsername = json['reviewerUsername'] as String?;
+
+    String displayName = 'Utente Anonimo';
+    if (reviewerFullName != null && reviewerFullName.trim().isNotEmpty) {
+      displayName = reviewerFullName.trim();
+    } else if (authorName != null && authorName.trim().isNotEmpty) {
+      displayName = authorName.trim();
+    } else if (reviewerUsername != null && reviewerUsername.trim().isNotEmpty) {
+      displayName = reviewerUsername.trim();
+    }
+
     return UserReview(
-      authorName: json['reviewerFullName'] as String? ?? json['authorName'] as String? ?? 'Utente Anonimo',
+      id: json['id'] as String?,
+      rideId: json['rideId'] as String?,
+      reviewerUsername: reviewerUsername,
+      authorName: displayName,
       authorAvatar: json['authorAvatar'] as String?,
       rating: (json['rating'] as num?)?.toDouble() ?? 0.0,
       comment: json['comment'] as String? ?? '',
