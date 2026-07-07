@@ -81,6 +81,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: '/benvenuto',
         builder: (context, state) => const WelcomeRoutesScreen(),
       ),
+      GoRoute(
+        path: '/profilo/edit-info',
+        builder: (context, state) => const EditPersonalInfoScreen(),
+      ),
+      GoRoute(
+        path: '/profilo/edit-preferences',
+        builder: (context, state) => const EditPreferencesScreen(),
+      ),
+      GoRoute(
+        path: '/profilo/edit-iban',
+        builder: (context, state) => const EditIbanScreen(),
+      ),
+      GoRoute(
+        path: '/profilo/edit-routes',
+        builder: (context, state) => const EditRoutesScreen(),
+      ),
       ShellRoute(
         builder: (context, state, child) {
           final location = state.matchedLocation;
@@ -120,24 +136,6 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GoRoute(
             path: '/profilo',
             builder: (context, state) => const ProfileScreen(),
-            routes: [
-              GoRoute(
-                path: 'edit-info',
-                builder: (context, state) => const EditPersonalInfoScreen(),
-              ),
-              GoRoute(
-                path: 'edit-preferences',
-                builder: (context, state) => const EditPreferencesScreen(),
-              ),
-              GoRoute(
-                path: 'edit-iban',
-                builder: (context, state) => const EditIbanScreen(),
-              ),
-              GoRoute(
-                path: 'edit-routes',
-                builder: (context, state) => const EditRoutesScreen(),
-              ),
-            ],
           ),
           GoRoute(
             path: '/impostazioni',
