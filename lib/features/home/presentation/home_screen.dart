@@ -1135,9 +1135,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           const Icon(Icons.person_outline, size: 14, color: AppColors.textMuted),
                           const SizedBox(width: 4),
-                          Text(
-                            'Guidatore: ${ride.driverFullName}',
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          Expanded(
+                            child: Text(
+                              'Guidatore: ${ride.driverFullName}',
+                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                         ],
                       ),

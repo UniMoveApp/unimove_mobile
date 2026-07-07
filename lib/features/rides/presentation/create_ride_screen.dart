@@ -135,15 +135,15 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
 
       // IMPORTANTE: NON usare toIso8601String() — converte in UTC perdendo l'ora locale.
       // Es: 08:00 in Italia (UTC+2) → "2026-07-07T06:00:00Z" → backend salva 06:00 invece di 08:00.
-      String _fmtLocal(DateTime dt) =>
+      String fmtLocal(DateTime dt) =>
           '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}'
           'T${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:00';
 
       final requestData = {
         'departureCity': _departureCityController.text.trim(),
-        'departureTime': _fmtLocal(_departureDateTime!),
+        'departureTime': fmtLocal(_departureDateTime!),
         'arrivalCity': _arrivalCityController.text.trim(),
-        'arrivalTimeEst': _fmtLocal(_arrivalTimeEstDateTime!),
+        'arrivalTimeEst': fmtLocal(_arrivalTimeEstDateTime!),
         'hotspots': hotspots,
         'vehicleModel': _vehicleModelController.text.trim().isEmpty ? null : _vehicleModelController.text.trim(),
         'vehiclePlate': _vehiclePlateController.text.trim().isEmpty ? null : _vehiclePlateController.text.trim(),

@@ -358,7 +358,12 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                                           children: [
                                             Icon(Icons.check_circle_outline, color: AppColors.universityGreen, size: 28),
                                             SizedBox(width: 10),
-                                            Text('Prenotazione Inviata!', style: TextStyle(color: AppColors.textPrimary)),
+                                            Expanded(
+                                              child: Text(
+                                                'Prenotazione Inviata!',
+                                                style: TextStyle(color: AppColors.textPrimary),
+                                              ),
+                                            ),
                                           ],
                                         ),
                                         content: Text(
