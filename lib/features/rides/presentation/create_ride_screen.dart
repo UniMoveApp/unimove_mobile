@@ -133,11 +133,17 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
 
       final travelPrefsStr = 'music:${_music ? 2 : 0},talk:${_talk ? 2 : 0},animals:${_animals ? 2 : 0},smoke:${_smoke ? 2 : 0},ac:${_ac ? 2 : 0}|${_travelPreferencesController.text.trim()}';
 
+      // IMPORTANTE: NON usare toIso8601String() — converte in UTC perdendo l'ora locale.
+      // Es: 08:00 in Italia (UTC+2) → "2026-07-07T06:00:00Z" → backend salva 06:00 invece di 08:00.
+      String fmtLocal(DateTime dt) =>
+          '${dt.year}-${dt.month.toString().padLeft(2, '0')}-${dt.day.toString().padLeft(2, '0')}'
+          'T${dt.hour.toString().padLeft(2, '0')}:${dt.minute.toString().padLeft(2, '0')}:00';
+
       final requestData = {
         'departureCity': _departureCityController.text.trim(),
-        'departureTime': _departureDateTime!.toIso8601String().split('.').first,
+        'departureTime': fmtLocal(_departureDateTime!),
         'arrivalCity': _arrivalCityController.text.trim(),
-        'arrivalTimeEst': _arrivalTimeEstDateTime!.toIso8601String().split('.').first,
+        'arrivalTimeEst': fmtLocal(_arrivalTimeEstDateTime!),
         'hotspots': hotspots,
         'vehicleModel': _vehicleModelController.text.trim().isEmpty ? null : _vehicleModelController.text.trim(),
         'vehiclePlate': _vehiclePlateController.text.trim().isEmpty ? null : _vehiclePlateController.text.trim(),
@@ -198,7 +204,7 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
         throw Exception("Stato risposta non valido dal server");
       }
     } on DioException catch (e) {
-      final errorMessage = e.response?.data?['message'] ?? 'Si è verificato un errore durante la creazione della corsa.';
+      final errorMessage = e.response?.data?['error'] ?? e.response?.data?['message'] ?? e.message ?? 'Si è verificato un errore durante la creazione della corsa.';
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

@@ -99,8 +99,12 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
         queryParams['arrivalCity'] = _arrivalCityController.text.trim();
       }
       if (_selectedDate != null) {
-        // Format date to ISO date: yyyy-MM-dd
-        queryParams['date'] = _selectedDate!.toIso8601String().split('T').first;
+        // IMPORTANTE: NON usare toIso8601String() perché converte in UTC e in Italia (UTC+2)
+        // "7 luglio" diventa "2026-07-06T22:00:00Z" → split → "2026-07-06" → 0 risultati.
+        // Si usa year/month/day locali direttamente.
+        final d = _selectedDate!;
+        queryParams['date'] =
+            '${d.year}-${d.month.toString().padLeft(2, '0')}-${d.day.toString().padLeft(2, '0')}';
       }
 
       final apiClient = ref.read(apiClientProvider);
@@ -121,7 +125,7 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
         throw Exception("Risposta non valida dal server");
       }
     } on DioException catch (e) {
-      final errorMessage = e.response?.data?['message'] ?? 'Si è verificato un errore durante la ricerca.';
+      final errorMessage = e.response?.data?['error'] ?? e.response?.data?['message'] ?? e.message ?? 'Si è verificato un errore durante la ricerca.';
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -234,11 +238,10 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
       return;
     }
 
-    // Collect all options for hotspots
+    // Collect all options for hotspots (departure city and intermediate stops)
     final hotspotOptions = <String>[];
     hotspotOptions.add(ride.departureCity); // Default meeting point is departure city
     hotspotOptions.addAll(ride.hotspots);
-    hotspotOptions.add(ride.arrivalCity); // Arrival city can also be selected
 
     String selectedHotspot = hotspotOptions.first;
     bool isSubmitting = false;
@@ -277,38 +280,37 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                     ),
                     const SizedBox(height: 16),
                     Flexible(
-                      child: ListView.builder(
-                        shrinkWrap: true,
-                        itemCount: hotspotOptions.length,
-                        itemBuilder: (context, index) {
-                          final option = hotspotOptions[index];
-                          final isDeparture = index == 0;
-                          final isArrival = index == hotspotOptions.length - 1;
-
-                          String subLabel = 'Fermata intermedia';
-                          if (isDeparture) subLabel = 'Punto di partenza';
-                          if (isArrival && hotspotOptions.length > 2) subLabel = 'Destinazione finale';
-
-                          return RadioListTile<String>(
-                            value: option,
-                            groupValue: selectedHotspot,
-                            title: Text(
-                              option,
-                              style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
-                            ),
-                            subtitle: Text(
-                              subLabel,
-                              style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
-                            ),
-                            activeColor: AppColors.universityGreen,
-                            contentPadding: EdgeInsets.zero,
-                            onChanged: (val) {
-                              if (val != null) {
-                                setModalState(() => selectedHotspot = val);
-                              }
-                            },
-                          );
+                      child: RadioGroup<String>(
+                        groupValue: selectedHotspot,
+                        onChanged: (val) {
+                          if (val != null) {
+                            setModalState(() => selectedHotspot = val);
+                          }
                         },
+                        child: ListView.builder(
+                          shrinkWrap: true,
+                          itemCount: hotspotOptions.length,
+                          itemBuilder: (context, index) {
+                            final option = hotspotOptions[index];
+                            final isDeparture = index == 0;
+
+                            final subLabel = isDeparture ? 'Punto di partenza' : 'Fermata intermedia';
+
+                            return RadioListTile<String>(
+                              value: option,
+                              title: Text(
+                                option,
+                                style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Text(
+                                subLabel,
+                                style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                              ),
+                              activeColor: AppColors.universityGreen,
+                              contentPadding: EdgeInsets.zero,
+                            );
+                          },
+                        ),
                       ),
                     ),
                     const SizedBox(height: 24),
@@ -352,7 +354,12 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                                           children: [
                                             Icon(Icons.check_circle_outline, color: AppColors.universityGreen, size: 28),
                                             SizedBox(width: 10),
-                                            Text('Prenotazione Inviata!', style: TextStyle(color: AppColors.textPrimary)),
+                                            Expanded(
+                                              child: Text(
+                                                'Prenotazione Inviata!',
+                                                style: TextStyle(color: AppColors.textPrimary),
+                                              ),
+                                            ),
                                           ],
                                         ),
                                         content: Text(
@@ -380,7 +387,7 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                                     throw Exception('Impossibile completare la prenotazione');
                                   }
                                 } on DioException catch (e) {
-                                  final errMsg = e.response?.data?['message'] ?? 'Errore durante la prenotazione.';
+                                  final errMsg = e.response?.data?['error'] ?? e.response?.data?['message'] ?? e.message ?? 'Errore durante la prenotazione.';
                                   if (!context.mounted) return;
                                   Navigator.pop(context);
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -907,6 +914,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                             fontWeight: FontWeight.bold,
                             fontSize: 15,
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                         Text(
                           '@${ride.driverUsername}',
@@ -914,6 +923,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                             color: AppColors.textMuted,
                             fontSize: 12,
                           ),
+                          overflow: TextOverflow.ellipsis,
+                          maxLines: 1,
                         ),
                       ],
                     ),
@@ -931,6 +942,7 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                         fontWeight: FontWeight.bold,
                         fontSize: 12,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ),
                 ],
@@ -1094,19 +1106,25 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Row(
-                    children: [
-                      _buildCardPreferenceIcon(Icons.music_note_outlined, ridePrefs['music']!),
-                      const SizedBox(width: 6),
-                      _buildCardPreferenceIcon(Icons.forum_outlined, ridePrefs['talk']!),
-                      const SizedBox(width: 6),
-                      _buildCardPreferenceIcon(Icons.pets_outlined, ridePrefs['animals']!),
-                      const SizedBox(width: 6),
-                      _buildCardPreferenceIcon(Icons.smoking_rooms_outlined, ridePrefs['smoke']!),
-                      const SizedBox(width: 6),
-                      _buildCardPreferenceIcon(Icons.ac_unit_outlined, ridePrefs['ac']!),
-                    ],
+                  Expanded(
+                    child: SingleChildScrollView(
+                      scrollDirection: Axis.horizontal,
+                      child: Row(
+                        children: [
+                          _buildCardPreferenceIcon(Icons.music_note_outlined, ridePrefs['music']!),
+                          const SizedBox(width: 6),
+                          _buildCardPreferenceIcon(Icons.forum_outlined, ridePrefs['talk']!),
+                          const SizedBox(width: 6),
+                          _buildCardPreferenceIcon(Icons.pets_outlined, ridePrefs['animals']!),
+                          const SizedBox(width: 6),
+                          _buildCardPreferenceIcon(Icons.smoking_rooms_outlined, ridePrefs['smoke']!),
+                          const SizedBox(width: 6),
+                          _buildCardPreferenceIcon(Icons.ac_unit_outlined, ridePrefs['ac']!),
+                        ],
+                      ),
+                    ),
                   ),
+                  const SizedBox(width: 8),
                   ElevatedButton(
                     onPressed: () => _openBookingSheet(ride),
                     style: ElevatedButton.styleFrom(

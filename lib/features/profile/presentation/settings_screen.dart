@@ -48,9 +48,37 @@ class SettingsScreen extends ConsumerWidget {
               label: 'Logout',
               labelColor: const Color(0xFFE57373),
               iconColor: const Color(0xFFE57373),
-              onTap: () {
-                ref.read(authControllerProvider.notifier).logout();
-              },
+              onTap: () => showDialog<void>(
+                context: context,
+                builder: (ctx) => AlertDialog(
+                  backgroundColor: AppColors.cardDark,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                  title: const Text(
+                    'Conferma logout',
+                    style: TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+                  ),
+                  content: const Text(
+                    'Sei sicuro di voler uscire?',
+                    style: TextStyle(color: AppColors.textSecondary),
+                  ),
+                  actions: [
+                    TextButton(
+                      onPressed: () => Navigator.pop(ctx),
+                      child: const Text('Annulla', style: TextStyle(color: AppColors.textMuted)),
+                    ),
+                    TextButton(
+                      onPressed: () {
+                        Navigator.pop(ctx);
+                        ref.read(authControllerProvider.notifier).logout();
+                      },
+                      child: const Text(
+                        'Esci',
+                        style: TextStyle(color: Color(0xFFE57373), fontWeight: FontWeight.bold),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
               isLast: true,
             ),
           ],

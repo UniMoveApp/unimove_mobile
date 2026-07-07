@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'dart:convert';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../auth/presentation/auth_controller.dart';
@@ -11,6 +12,10 @@ import '../../rides/presentation/my_rides_controller.dart';
 import '../../rides/presentation/my_bookings_controller.dart';
 
 final archivedRidesProvider = FutureProvider<List<Ride>>((ref) async {
+  // Guard: non effettuare chiamate API se l'utente non è autenticato
+  final authState = ref.watch(authControllerProvider);
+  if (authState.status != AuthStatus.authenticated) return [];
+
   final apiClient = ref.watch(apiClientProvider);
   final response = await apiClient.dio.get('rides/archive');
   if (response.statusCode == 200 && response.data != null) {
@@ -173,7 +178,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           children: [
             const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 28),
             const SizedBox(width: 10),
-            Text(actionName, style: const TextStyle(color: AppColors.textPrimary)),
+            Expanded(
+              child: Text(
+                actionName,
+                style: const TextStyle(color: AppColors.textPrimary),
+                overflow: TextOverflow.ellipsis,
+              ),
+            ),
           ],
         ),
         content: Text(
@@ -231,6 +242,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget build(BuildContext context) {
     final userNameAsync = ref.watch(userNameProvider);
     final userProfileAsync = ref.watch(userProfileProvider);
+    final myRidesAsync = ref.watch(myRidesProvider);
+    final myBookingsAsync = ref.watch(myBookingsProvider);
 
     return SingleChildScrollView(
       padding: const EdgeInsets.symmetric(horizontal: 20.0),
@@ -241,16 +254,68 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           // User Header
           Row(
             children: [
-              Container(
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: AppColors.surfaceDark,
+              userProfileAsync.when(
+                data: (profile) {
+                  final avatarUrl = profile?.avatarUrl;
+                  if (avatarUrl != null && avatarUrl.startsWith('data:image')) {
+                    try {
+                      final base64Str = avatarUrl.split(',').last;
+                      final bytes = base64Decode(base64Str);
+                      return Container(
+                        decoration: BoxDecoration(
+                          shape: BoxShape.circle,
+                          border: Border.all(color: AppColors.universityGreen, width: 2),
+                        ),
+                        child: CircleAvatar(
+                          radius: 35,
+                          backgroundImage: MemoryImage(bytes),
+                        ),
+                      );
+                    } catch (_) {}
+                  }
+                  return Container(
+                    decoration: const BoxDecoration(
+                      shape: BoxShape.circle,
+                      color: AppColors.surfaceDark,
+                    ),
+                    padding: const EdgeInsets.all(2),
+                    child: const CircleAvatar(
+                      radius: 35,
+                      backgroundColor: AppColors.deepBlack,
+                      child: Icon(Icons.person_outline, size: 40, color: AppColors.universityGreen),
+                    ),
+                  );
+                },
+                loading: () => Container(
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.surfaceDark,
+                  ),
+                  padding: const EdgeInsets.all(2),
+                  child: const CircleAvatar(
+                    radius: 35,
+                    backgroundColor: AppColors.deepBlack,
+                    child: SizedBox(
+                      width: 20,
+                      height: 20,
+                      child: CircularProgressIndicator(
+                        strokeWidth: 2,
+                        color: AppColors.universityGreen,
+                      ),
+                    ),
+                  ),
                 ),
-                padding: const EdgeInsets.all(2),
-                child: const CircleAvatar(
-                  radius: 35,
-                  backgroundColor: AppColors.deepBlack,
-                  child: Icon(Icons.person_outline, size: 40, color: AppColors.universityGreen),
+                error: (_, __) => Container(
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: AppColors.surfaceDark,
+                  ),
+                  padding: const EdgeInsets.all(2),
+                  child: const CircleAvatar(
+                    radius: 35,
+                    backgroundColor: AppColors.deepBlack,
+                    child: Icon(Icons.person_outline, size: 40, color: AppColors.universityGreen),
+                  ),
                 ),
               ),
               const SizedBox(width: 16),
@@ -300,61 +365,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ],
           ),
           const SizedBox(height: 32),
-
           // Reminder Card
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: AppColors.surfaceDark,
-              borderRadius: BorderRadius.circular(24),
-              border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
-                  decoration: BoxDecoration(
-                    color: AppColors.deepBlack,
-                    borderRadius: BorderRadius.circular(16),
-                  ),
-                  child: const Icon(Icons.calendar_today_outlined, color: AppColors.universityGreen),
-                ),
-                const SizedBox(width: 16),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        'Promemoria',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: AppColors.textPrimary,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      const Text(
-                        'Hai due eventi in programma per le prossime ore',
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: AppColors.textSecondary,
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      ElevatedButton(
-                        onPressed: () {},
-                        style: ElevatedButton.styleFrom(
-                          minimumSize: const Size(140, 40),
-                          padding: const EdgeInsets.symmetric(horizontal: 16),
-                        ),
-                        child: const Text('Visualizza dettagli', style: TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+          _buildReminderCard(myRidesAsync, myBookingsAsync),
           const SizedBox(height: 32),
 
           // Tab Selection
@@ -387,13 +399,124 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
+
+
+  Widget _buildReminderCard(
+    AsyncValue<List<Ride>> myRidesAsync,
+    AsyncValue<List<PassengerBooking>> myBookingsAsync,
+  ) {
+    if (myRidesAsync.isLoading || myBookingsAsync.isLoading) {
+      return Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: AppColors.surfaceDark,
+          borderRadius: BorderRadius.circular(24),
+          border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+        ),
+        child: const Row(
+          children: [
+            Skeleton(width: 48, height: 48, borderRadius: 16),
+            SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Skeleton(width: 100, height: 16, borderRadius: 4),
+                  SizedBox(height: 6),
+                  Skeleton(width: 160, height: 14, borderRadius: 4),
+                ],
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+
+    final myRides = myRidesAsync.value ?? [];
+    final myBookings = myBookingsAsync.value ?? [];
+    final now = DateTime.now();
+
+    // Corse come guidatore attive (OPEN o IN_PROGRESS)
+    final upcomingDriverRides = myRides.where((ride) =>
+        (ride.status == 'OPEN' || ride.status == 'IN_PROGRESS') &&
+        ride.departureTime.isAfter(now.subtract(const Duration(hours: 2)))).toList();
+
+    // Prenotazioni come passeggero attive (OPEN o IN_PROGRESS)
+    final upcomingPassengerBookings = myBookings.where((b) {
+      final ride = b.ride;
+      if (ride == null) return false;
+      return (ride.status == 'OPEN' || ride.status == 'IN_PROGRESS') &&
+          ride.departureTime.isAfter(now.subtract(const Duration(hours: 2)));
+    }).toList();
+
+    final totalUpcomingEvents = upcomingDriverRides.length + upcomingPassengerBookings.length;
+    final hasEvents = totalUpcomingEvents > 0;
+
+    final title = hasEvents ? 'Promemoria' : 'Nessun viaggio';
+    final subtitle = hasEvents
+        ? 'Hai $totalUpcomingEvents ${totalUpcomingEvents == 1 ? 'viaggio in programma' : 'viaggi in programma'} per le prossime ore.'
+        : 'Non hai viaggi in programma per le prossime ore.';
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: AppColors.surfaceDark,
+        borderRadius: BorderRadius.circular(24),
+        border: Border.all(color: Colors.white.withValues(alpha: 0.05)),
+      ),
+      child: Row(
+        children: [
+          Container(
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              color: AppColors.deepBlack,
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Icon(
+              hasEvents ? Icons.calendar_today_outlined : Icons.explore_outlined,
+              color: AppColors.universityGreen,
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary,
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  subtitle,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   Widget _buildTabContent(AsyncValue<UserProfile?> userProfileAsync) {
     switch (_currentIndex) {
       case 0:
         final myRidesAsync = ref.watch(myRidesProvider);
         return myRidesAsync.when(
           data: (rides) {
-            if (rides.isEmpty) {
+            // Mostra solo le corse attive: OPEN e IN_PROGRESS
+            final activeRides = rides.where((r) =>
+              r.status == 'OPEN' || r.status == 'IN_PROGRESS'
+            ).toList();
+            if (activeRides.isEmpty) {
               return const Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
@@ -412,7 +535,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ),
                       SizedBox(height: 8),
                       Text(
-                        'Non hai ancora corse create.',
+                        'Non hai ancora corse attive.',
                         style: TextStyle(
                           fontSize: 14,
                           color: AppColors.textSecondary,
@@ -424,7 +547,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               );
             }
             return Column(
-              children: rides.map((ride) => _buildDriverRideCard(ride)).toList(),
+              children: activeRides.map((ride) => _buildDriverRideCard(ride)).toList(),
             );
           },
           loading: () => Column(
@@ -457,7 +580,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         final myBookingsAsync = ref.watch(myBookingsProvider);
         return myBookingsAsync.when(
           data: (bookings) {
-            if (bookings.isEmpty) {
+            // Il provider già filtra le booking attive; questo è un secondo livello di sicurezza
+            final activeBookings = bookings.where((b) {
+              final rideStatus = b.ride?.status;
+              if (rideStatus == null) return false; // corsa non trovata = completata
+              return rideStatus == 'OPEN' || rideStatus == 'IN_PROGRESS';
+            }).toList();
+            if (activeBookings.isEmpty) {
               return const Center(
                 child: Padding(
                   padding: EdgeInsets.symmetric(vertical: 40),
@@ -488,7 +617,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               );
             }
             return Column(
-              children: bookings.map((b) => _buildPassengerBookingCard(b)).toList(),
+              children: activeBookings.map((b) => _buildPassengerBookingCard(b)).toList(),
             );
           },
           loading: () => Column(
@@ -585,25 +714,41 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               _buildSkeletonEventCard(),
             ],
           ),
-          error: (err, stack) => Center(
-            child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 40),
-              child: Column(
-                children: [
-                  Text(
-                    'Errore nel caricamento dell\'archivio: $err',
-                    style: const TextStyle(color: AppColors.textMuted),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 12),
-                  ElevatedButton(
-                    onPressed: () => ref.invalidate(archivedRidesProvider),
-                    child: const Text('Riprova'),
-                  ),
-                ],
+          error: (err, stack) {
+            String displayMessage;
+            final errStr = err.toString().toLowerCase();
+            if (errStr.contains('403') || errStr.contains('non autorizzato') || errStr.contains('accesso')) {
+              displayMessage = 'Sessione non valida. Prova a effettuare di nuovo il login.';
+            } else if (errStr.contains('timeout') || errStr.contains('connessione') || errStr.contains('rete')) {
+              displayMessage = 'Impossibile raggiungere il server. Controlla la connessione.';
+            } else if (errStr.contains('500')) {
+              displayMessage = 'Errore del server. Riprova più tardi.';
+            } else {
+              displayMessage = 'Errore nel caricamento dell\'archivio. Riprova.';
+            }
+            return Center(
+              child: Padding(
+                padding: const EdgeInsets.symmetric(vertical: 40),
+                child: Column(
+                  children: [
+                    const Icon(Icons.cloud_off_outlined, size: 48, color: AppColors.textMuted),
+                    const SizedBox(height: 12),
+                    Text(
+                      displayMessage,
+                      style: const TextStyle(color: AppColors.textMuted),
+                      textAlign: TextAlign.center,
+                    ),
+                    const SizedBox(height: 12),
+                    ElevatedButton.icon(
+                      onPressed: () => ref.invalidate(archivedRidesProvider),
+                      icon: const Icon(Icons.refresh),
+                      label: const Text('Riprova'),
+                    ),
+                  ],
+                ),
               ),
-            ),
-          ),
+            );
+          },
         );
       default:
         return const SizedBox.shrink();
@@ -907,9 +1052,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           const Icon(Icons.person_outline, size: 14, color: AppColors.textMuted),
                           const SizedBox(width: 4),
-                          Text(
-                            'Guidatore: $driverName',
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          Expanded(
+                            child: Text(
+                              'Guidatore: $driverName',
+                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                         ],
                       ),
@@ -961,6 +1110,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             fontWeight: isBold ? FontWeight.bold : FontWeight.normal,
             color: isSmall ? AppColors.textSecondary : AppColors.textPrimary,
           ),
+          overflow: TextOverflow.ellipsis,
+          maxLines: 1,
         ),
       ],
     );
@@ -1093,9 +1244,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         children: [
                           const Icon(Icons.person_outline, size: 14, color: AppColors.textMuted),
                           const SizedBox(width: 4),
-                          Text(
-                            'Guidatore: ${ride.driverFullName}',
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                          Expanded(
+                            child: Text(
+                              'Guidatore: ${ride.driverFullName}',
+                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                              overflow: TextOverflow.ellipsis,
+                              maxLines: 1,
+                            ),
                           ),
                         ],
                       ),

@@ -21,9 +21,9 @@ class AuthService {
   }
 
   /// Elimina il token (logout)
+  /// Nota: l'onboarding key NON viene cancellata — persiste tra sessioni dello stesso dispositivo
   Future<void> deleteToken() async {
     await _storage.delete(key: _tokenKey);
-    await _storage.delete(key: _onboardingKey);
   }
 
   /// Salva lo stato di completamento del benvenuto

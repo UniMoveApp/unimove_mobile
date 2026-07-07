@@ -3,12 +3,43 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../auth/presentation/auth_controller.dart';
 
-class EditPersonalInfoScreen extends ConsumerWidget {
+class EditPersonalInfoScreen extends ConsumerStatefulWidget {
   const EditPersonalInfoScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<EditPersonalInfoScreen> createState() => _EditPersonalInfoScreenState();
+}
+
+class _EditPersonalInfoScreenState extends ConsumerState<EditPersonalInfoScreen> {
+  late final TextEditingController _nameController;
+  late final TextEditingController _emailController;
+  bool _initialized = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _nameController = TextEditingController();
+    _emailController = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _nameController.dispose();
+    _emailController.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final userProfileAsync = ref.watch(userProfileProvider);
+
+    userProfileAsync.whenData((profile) {
+      if (!_initialized && profile != null) {
+        _nameController.text = profile.fullName;
+        _emailController.text = profile.email;
+        _initialized = true;
+      }
+    });
 
     return Scaffold(
       backgroundColor: AppColors.deepBlack,
@@ -27,9 +58,6 @@ class EditPersonalInfoScreen extends ConsumerWidget {
               ),
             );
           }
-
-          final nameController = TextEditingController(text: profile.fullName);
-          final emailController = TextEditingController(text: profile.email);
 
           return SingleChildScrollView(
             padding: const EdgeInsets.all(24.0),
@@ -57,13 +85,13 @@ class EditPersonalInfoScreen extends ConsumerWidget {
                 // Form Fields
                 _buildReadOnlyField(
                   label: 'NOME COMPLETO',
-                  controller: nameController,
+                  controller: _nameController,
                   icon: Icons.person_outline,
                 ),
                 const SizedBox(height: 20),
                 _buildReadOnlyField(
                   label: 'EMAIL ISTITUZIONALE',
-                  controller: emailController,
+                  controller: _emailController,
                   icon: Icons.email_outlined,
                 ),
                 const SizedBox(height: 40),
