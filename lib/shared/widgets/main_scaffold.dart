@@ -47,7 +47,7 @@ class MainScaffold extends StatelessWidget {
           mainAxisAlignment: MainAxisAlignment.spaceAround,
           children: [
             _buildNavItem(context, Icons.home_filled, '/home'),
-            _buildNavItem(context, Icons.map_outlined, '/esplora'),
+            _buildNavItem(context, Icons.chat_bubble_outline, '/chat'),
             _buildNavItem(context, Icons.add, '/corse/crea', isCenter: true),
             _buildNavItem(context, Icons.search, '/corse/cerca'),
             _buildNavItem(context, Icons.person_outline, '/profilo'),

@@ -11,7 +11,7 @@ import '../../features/profile/presentation/edit_preferences_screen.dart';
 import '../../features/profile/presentation/edit_iban_screen.dart';
 import '../../features/profile/presentation/edit_routes_screen.dart';
 import '../../features/profile/presentation/settings_screen.dart';
-import '../../features/explore/presentation/explore_screen.dart';
+import '../../features/chat/presentation/chat_screen.dart';
 import '../../features/auth/presentation/welcome_routes_screen.dart';
 import '../../features/auth/presentation/auth_controller.dart';
 import '../../shared/widgets/main_scaffold.dart';
@@ -105,8 +105,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             title = 'Home';
           } else if (location == '/impostazioni') {
             title = 'Impostazioni';
-          } else if (location == '/esplora') {
-            title = 'Esplora';
+          } else if (location == '/chat') {
+            title = 'Chat';
           } else if (location == '/corse/crea') {
             title = 'Crea Corsa';
           } else if (location == '/corse/cerca') {
@@ -142,8 +142,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             builder: (context, state) => const SettingsScreen(),
           ),
           GoRoute(
-            path: '/esplora',
-            builder: (context, state) => const ExploreScreen(),
+            path: '/chat',
+            builder: (context, state) => const ChatScreen(),
           ),
         ],
       ),
