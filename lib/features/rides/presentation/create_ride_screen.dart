@@ -33,6 +33,9 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
   // FocusNode per Autocomplete
   final _departureFocusNode = FocusNode();
   final _arrivalFocusNode = FocusNode();
+  final _hotspot1FocusNode = FocusNode();
+  final _hotspot2FocusNode = FocusNode();
+  final _hotspot3FocusNode = FocusNode();
 
   // Stati interni
   DateTime? _departureDateTime;
@@ -62,6 +65,9 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
     _travelPreferencesController.dispose();
     _departureFocusNode.dispose();
     _arrivalFocusNode.dispose();
+    _hotspot1FocusNode.dispose();
+    _hotspot2FocusNode.dispose();
+    _hotspot3FocusNode.dispose();
     super.dispose();
   }
 
@@ -407,39 +413,68 @@ class _CreateRideScreenState extends ConsumerState<CreateRideScreen> {
                 const SizedBox(height: 16),
                 TextFormField(
                   controller: _vehiclePlateController,
+                  maxLength: 7,
                   decoration: const InputDecoration(
                     labelText: 'Targa auto (Opzionale)',
                     hintText: 'Es: AB123CD',
                     prefixIcon: Icon(Icons.badge_outlined, color: AppColors.universityGreen),
+                    counterText: '',
                   ),
+                  validator: (value) {
+                    if (value != null && value.trim().length > 7) {
+                      return 'La targa non può superare i 7 caratteri';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 24),
 
                 // Sezione 3: Fermate intermedie (Hotspots)
                 _buildSectionTitle('Fermate Intermedie (Fino a 3 - Opzionali)'),
                 const SizedBox(height: 12),
-                TextFormField(
+                _buildCityAutocomplete(
+                  label: 'Fermata 1 (Opzionale)',
+                  hint: 'Es: Isernia',
+                  icon: Icons.location_on_outlined,
                   controller: _hotspot1Controller,
-                  decoration: const InputDecoration(
-                    labelText: 'Fermata 1 (Opzionale)',
-                    hintText: 'Es: Isernia (Bivio)',
-                  ),
+                  focusNode: _hotspot1FocusNode,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return null;
+                    if (!comuniMolise.contains(value.trim())) {
+                      return 'Seleziona un comune molisano valido';
+                    }
+                    return null;
+                  },
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
+                const SizedBox(height: 16),
+                _buildCityAutocomplete(
+                  label: 'Fermata 2 (Opzionale)',
+                  hint: 'Es: Bojano',
+                  icon: Icons.location_on_outlined,
                   controller: _hotspot2Controller,
-                  decoration: const InputDecoration(
-                    labelText: 'Fermata 2 (Opzionale)',
-                    hintText: 'Es: Bojano',
-                  ),
+                  focusNode: _hotspot2FocusNode,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return null;
+                    if (!comuniMolise.contains(value.trim())) {
+                      return 'Seleziona un comune molisano valido';
+                    }
+                    return null;
+                  },
                 ),
-                const SizedBox(height: 12),
-                TextFormField(
+                const SizedBox(height: 16),
+                _buildCityAutocomplete(
+                  label: 'Fermata 3 (Opzionale)',
+                  hint: 'Es: Campomarino',
+                  icon: Icons.location_on_outlined,
                   controller: _hotspot3Controller,
-                  decoration: const InputDecoration(
-                    labelText: 'Fermata 3 (Opzionale)',
-                    hintText: 'Es: San Massimo',
-                  ),
+                  focusNode: _hotspot3FocusNode,
+                  validator: (value) {
+                    if (value == null || value.trim().isEmpty) return null;
+                    if (!comuniMolise.contains(value.trim())) {
+                      return 'Seleziona un comune molisano valido';
+                    }
+                    return null;
+                  },
                 ),
                 const SizedBox(height: 24),
 
