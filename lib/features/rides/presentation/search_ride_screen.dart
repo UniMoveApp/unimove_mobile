@@ -37,6 +37,7 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
   TimeOfDay? _selectedDepartureTime;
   TimeOfDay? _selectedArrivalTimeEst;
   int _seatsFilter = 1;
+  String? _validationErrorMessage;
 
   // Travel Preferences Filters (true = active/selected)
   bool _musicFilter = false;
@@ -78,12 +79,16 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
   // Trigger search API call
   Future<void> _performSearch() async {
     if (!_formKey.currentState!.validate()) {
+      setState(() {
+        _validationErrorMessage = 'Seleziona la data di partenza obbligatoria (*)';
+      });
       return;
     }
 
     setState(() {
       _isLoading = true;
       _showResults = true;
+      _validationErrorMessage = null;
     });
 
     try {
@@ -680,6 +685,16 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                     }),
                   ],
                 ),
+                if (_validationErrorMessage != null) ...[
+                  Center(
+                    child: Text(
+                      _validationErrorMessage!,
+                      style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.bold),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  const SizedBox(height: 16),
+                ],
                 const SizedBox(height: 32),
 
                 // Cerca button

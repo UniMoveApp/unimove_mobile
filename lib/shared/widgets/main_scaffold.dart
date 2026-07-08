@@ -32,7 +32,7 @@ class MainScaffold extends StatelessWidget {
         actions: [
           IconButton(
             icon: const Icon(Icons.notifications_none_outlined, color: Colors.white),
-            onPressed: () {},
+            onPressed: () => context.push('/notifiche'),
           ),
         ],
       ),

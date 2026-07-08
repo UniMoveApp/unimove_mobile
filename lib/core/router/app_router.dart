@@ -14,6 +14,7 @@ import '../../features/profile/presentation/settings_screen.dart';
 import '../../features/chat/presentation/chat_screen.dart';
 import '../../features/auth/presentation/welcome_routes_screen.dart';
 import '../../features/auth/presentation/auth_controller.dart';
+import '../../features/home/presentation/notifications_screen.dart';
 import '../../shared/widgets/main_scaffold.dart';
 import '../../shared/theme/app_theme.dart';
 
@@ -80,6 +81,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: '/benvenuto',
         builder: (context, state) => const WelcomeRoutesScreen(),
+      ),
+      GoRoute(
+        path: '/notifiche',
+        builder: (context, state) => const NotificationsScreen(),
       ),
       GoRoute(
         path: '/profilo/edit-info',
