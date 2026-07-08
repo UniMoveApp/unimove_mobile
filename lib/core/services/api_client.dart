@@ -31,17 +31,33 @@ class ApiClient {
       onRequest: (options, handler) async {
         try {
           final token = await _authService.getToken();
+          debugPrint('DEBUG API REQUEST: ${options.method} ${options.uri}');
           if (token != null) {
+            final truncated = token.length > 15 ? token.substring(0, 15) : token;
+            debugPrint('DEBUG API REQUEST TOKEN: Bearer $truncated...');
             options.headers['Authorization'] = 'Bearer $token';
+          } else {
+            debugPrint('DEBUG API REQUEST TOKEN: NULL');
           }
-        } catch (_) {}
+        } catch (e) {
+          debugPrint('DEBUG API REQUEST TOKEN ERROR: $e');
+        }
         return handler.next(options);
+      },
+      onResponse: (response, handler) {
+        debugPrint('DEBUG API RESPONSE: ${response.statusCode} for ${response.requestOptions.method} ${response.requestOptions.uri}');
+        return handler.next(response);
       },
       onError: (DioException e, handler) async {
         final statusCode = e.response?.statusCode;
+        debugPrint('DEBUG API ERROR: $statusCode - ${e.message} for ${e.requestOptions.method} ${e.requestOptions.uri}');
+        if (e.response?.data != null) {
+          debugPrint('DEBUG API ERROR RESPONSE BODY: ${e.response?.data}');
+        }
 
         if (statusCode == 401) {
           // Token scaduto o non valido: elimina il token e notifica l'AuthController
+          debugPrint('DEBUG API 401: Invalidating token and logging out');
           await _authService.deleteToken();
           onUnauthorized?.call();
         }
