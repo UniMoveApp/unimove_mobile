@@ -51,7 +51,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     if (!_acceptTerms) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Accetta i termini e le condizioni per continuare'),
+          content: Text(
+            'Accetta i termini e le condizioni per continuare',
+            style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
           backgroundColor: AppColors.surfaceDark,
           behavior: SnackBarBehavior.floating,
         ),
@@ -70,7 +73,10 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final error = ref.read(authControllerProvider).errorMessage;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text(error ?? 'Credenziali non valide'),
+          content: Text(
+            error ?? 'Credenziali non valide',
+            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+          ),
           backgroundColor: Colors.redAccent,
           behavior: SnackBarBehavior.floating,
         ),
