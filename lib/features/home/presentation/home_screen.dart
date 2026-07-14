@@ -238,6 +238,56 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 
+  Future<void> _handleAcceptBooking(String bookingId, String rideId) async {
+    try {
+      await ref.read(myRidesServiceProvider).acceptBooking(bookingId, rideId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Richiesta accettata con successo!'),
+            backgroundColor: AppColors.universityGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
+  Future<void> _handleRejectBooking(String bookingId, String rideId) async {
+    try {
+      await ref.read(myRidesServiceProvider).rejectBooking(bookingId, rideId);
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Richiesta rifiutata.'),
+            backgroundColor: AppColors.universityGreen,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(e.toString().replaceAll('Exception: ', '')),
+            backgroundColor: Colors.redAccent,
+            behavior: SnackBarBehavior.floating,
+          ),
+        );
+      }
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final userNameAsync = ref.watch(userNameProvider);
@@ -936,6 +986,134 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          const Divider(color: Colors.white12, height: 1),
+          const SizedBox(height: 12),
+          const Row(
+            children: [
+              Icon(Icons.people_alt_outlined, size: 16, color: AppColors.universityGreen),
+              SizedBox(width: 6),
+              Text(
+                'Richieste e Passeggeri',
+                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+              ),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Consumer(
+            builder: (context, ref, child) {
+              final bookingsAsync = ref.watch(rideBookingsProvider(ride.id));
+              return bookingsAsync.when(
+                data: (bookings) {
+                  if (bookings.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.symmetric(vertical: 4),
+                      child: Text(
+                        'Nessun passeggero ha ancora richiesto di partecipare.',
+                        style: TextStyle(fontSize: 12, color: AppColors.textMuted, fontStyle: FontStyle.italic),
+                      ),
+                    );
+                  }
+                  return Column(
+                    children: bookings.map((b) {
+                      Color badgeBg;
+                      Color badgeText;
+                      String label;
+                      if (b.status == 'PENDING') {
+                        badgeBg = Colors.amber.withValues(alpha: 0.15);
+                        badgeText = Colors.amber;
+                        label = 'In attesa';
+                      } else if (b.status == 'CONFIRMED') {
+                        badgeBg = AppColors.universityGreen.withValues(alpha: 0.15);
+                        badgeText = AppColors.universityGreen;
+                        label = 'Confermato';
+                      } else {
+                        badgeBg = Colors.redAccent.withValues(alpha: 0.15);
+                        badgeText = Colors.redAccent;
+                        label = 'Rifiutato';
+                      }
+
+                      return Container(
+                        margin: const EdgeInsets.symmetric(vertical: 4),
+                        padding: const EdgeInsets.all(8),
+                        decoration: BoxDecoration(
+                          color: AppColors.deepBlack.withValues(alpha: 0.3),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            Expanded(
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    b.passengerFullName.isNotEmpty ? b.passengerFullName : b.passengerUsername,
+                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                                  ),
+                                  if (b.hotspotChosen != null && b.hotspotChosen!.isNotEmpty) ...[
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Fermata: ${b.hotspotChosen}',
+                                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                    ),
+                                  ],
+                                ],
+                              ),
+                            ),
+                            const SizedBox(width: 8),
+                            Row(
+                              children: [
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: badgeBg,
+                                    borderRadius: BorderRadius.circular(6),
+                                  ),
+                                  child: Text(
+                                    label,
+                                    style: TextStyle(color: badgeText, fontSize: 10, fontWeight: FontWeight.bold),
+                                  ),
+                                ),
+                                if (b.status == 'PENDING') ...[
+                                  const SizedBox(width: 8),
+                                  IconButton(
+                                    constraints: const BoxConstraints(),
+                                    padding: EdgeInsets.zero,
+                                    icon: const Icon(Icons.check_circle_outline, color: AppColors.universityGreen, size: 22),
+                                    onPressed: () => _handleAcceptBooking(b.id, ride.id),
+                                  ),
+                                  const SizedBox(width: 4),
+                                  IconButton(
+                                    constraints: const BoxConstraints(),
+                                    padding: EdgeInsets.zero,
+                                    icon: const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 22),
+                                    onPressed: () => _handleRejectBooking(b.id, ride.id),
+                                  ),
+                                ],
+                              ],
+                            ),
+                          ],
+                        ),
+                      );
+                    }).toList(),
+                  );
+                },
+                loading: () => const Padding(
+                  padding: EdgeInsets.symmetric(vertical: 8),
+                  child: SizedBox(
+                    width: 16,
+                    height: 16,
+                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.universityGreen),
+                  ),
+                ),
+                error: (err, _) => const Text(
+                  'Errore caricamento passeggeri',
+                  style: TextStyle(fontSize: 12, color: Colors.redAccent),
+                ),
+              );
+            },
+          ),
           if (actions.isNotEmpty) ...[
             const SizedBox(height: 16),
             Row(
@@ -972,6 +1150,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
     final isRideInProgress = ride?.status == 'IN_PROGRESS';
     final buttonLabel = isRideInProgress ? 'Abbandona' : 'Cancella';
+
+    final Color statusBgColor;
+    final Color statusTextColor;
+    final String statusLabel;
+
+    if (booking.status == 'PENDING') {
+      statusBgColor = Colors.amber.withValues(alpha: 0.15);
+      statusTextColor = Colors.amber;
+      statusLabel = 'In attesa';
+    } else if (booking.status == 'REJECTED') {
+      statusBgColor = Colors.redAccent.withValues(alpha: 0.15);
+      statusTextColor = Colors.redAccent;
+      statusLabel = 'Rifiutata';
+    } else {
+      if (isRideInProgress) {
+        statusBgColor = Colors.orange.withValues(alpha: 0.15);
+        statusTextColor = Colors.orange;
+        statusLabel = 'In corso';
+      } else {
+        statusBgColor = AppColors.universityGreen.withValues(alpha: 0.15);
+        statusTextColor = AppColors.universityGreen;
+        statusLabel = 'Confermata';
+      }
+    }
 
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
@@ -1028,13 +1230,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
-                            color: (isRideInProgress ? Colors.orange : AppColors.universityGreen).withValues(alpha: 0.15),
+                            color: statusBgColor,
                             borderRadius: BorderRadius.circular(8),
                           ),
                           child: Text(
-                            isRideInProgress ? 'In corso' : 'Prenotata',
+                            statusLabel,
                             style: TextStyle(
-                              color: isRideInProgress ? Colors.orange : AppColors.universityGreen,
+                              color: statusTextColor,
                               fontSize: 11,
                               fontWeight: FontWeight.bold,
                             ),

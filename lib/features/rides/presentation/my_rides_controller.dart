@@ -4,6 +4,7 @@ import '../../../core/services/api_client.dart';
 import '../../auth/domain/user_profile.dart';
 import '../../auth/presentation/auth_controller.dart';
 import '../../home/presentation/home_screen.dart';
+import 'my_bookings_controller.dart';
 
 // Il backend supporta ?status= su GET /rides/my
 // Richiediamo separatamente OPEN e IN_PROGRESS per avere solo le corse attive
@@ -27,6 +28,16 @@ final myRidesProvider = FutureProvider<List<Ride>>((ref) async {
   // Ordina per orario di partenza
   result.sort((a, b) => a.departureTime.compareTo(b.departureTime));
   return result;
+});
+
+final rideBookingsProvider = FutureProvider.family<List<PassengerBooking>, String>((ref, rideId) async {
+  final apiClient = ref.watch(apiClientProvider);
+  final response = await apiClient.dio.get('bookings/ride/$rideId');
+  if (response.statusCode == 200 && response.data != null) {
+    final list = response.data as List<dynamic>;
+    return list.map((e) => PassengerBooking.fromJson(e as Map<String, dynamic>)).toList();
+  }
+  throw Exception('Impossibile caricare le prenotazioni per questa corsa');
 });
 
 class MyRidesService {
@@ -77,6 +88,36 @@ class MyRidesService {
       }
     } on DioException catch (e) {
       final msg = e.response?.data?['error'] ?? e.response?.data?['message'] ?? e.message ?? 'Impossibile eliminare la corsa';
+      throw Exception(msg);
+    }
+  }
+
+  Future<void> acceptBooking(String bookingId, String rideId) async {
+    try {
+      final response = await _apiClient.dio.patch('bookings/$bookingId/accept');
+      if (response.statusCode == 200) {
+        _ref.invalidate(rideBookingsProvider(rideId));
+        _ref.invalidate(myRidesProvider);
+      } else {
+        throw Exception('Errore durante l\'accettazione della prenotazione');
+      }
+    } on DioException catch (e) {
+      final msg = e.response?.data?['error'] ?? e.response?.data?['message'] ?? e.message ?? 'Impossibile accettare la prenotazione';
+      throw Exception(msg);
+    }
+  }
+
+  Future<void> rejectBooking(String bookingId, String rideId) async {
+    try {
+      final response = await _apiClient.dio.patch('bookings/$bookingId/reject');
+      if (response.statusCode == 200) {
+        _ref.invalidate(rideBookingsProvider(rideId));
+        _ref.invalidate(myRidesProvider);
+      } else {
+        throw Exception('Errore durante il rifiuto della prenotazione');
+      }
+    } on DioException catch (e) {
+      final msg = e.response?.data?['error'] ?? e.response?.data?['message'] ?? e.message ?? 'Impossibile rifiutare la prenotazione';
       throw Exception(msg);
     }
   }
