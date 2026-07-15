@@ -16,26 +16,29 @@ class MainScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool showAppBar = currentRoute != '/corse/cerca' && currentRoute != '/chat';
     return Scaffold(
       backgroundColor: AppColors.deepBlack,
-      appBar: AppBar(
-        backgroundColor: AppColors.deepBlack,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.menu, color: Colors.white),
-          onPressed: () => context.go('/impostazioni'),
-        ),
-        title: Text(
-          title,
-          style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
-        ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.notifications_none_outlined, color: Colors.white),
-            onPressed: () => context.push('/notifiche'),
-          ),
-        ],
-      ),
+      appBar: showAppBar
+          ? AppBar(
+              backgroundColor: AppColors.deepBlack,
+              elevation: 0,
+              leading: IconButton(
+                icon: const Icon(Icons.menu, color: Colors.white),
+                onPressed: () => context.go('/impostazioni'),
+              ),
+              title: Text(
+                title,
+                style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+              ),
+              actions: [
+                IconButton(
+                  icon: const Icon(Icons.notifications_none_outlined, color: Colors.white),
+                  onPressed: () => context.push('/notifiche'),
+                ),
+              ],
+            )
+          : null,
       body: body,
       bottomNavigationBar: Container(
         padding: const EdgeInsets.symmetric(vertical: 12),

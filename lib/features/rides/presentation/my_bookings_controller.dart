@@ -36,7 +36,7 @@ class PassengerBooking {
       hotspotChosen: json['hotspotChosen'] as String?,
       status: json['status'] as String? ?? 'CONFIRMED',
       createdAt: json['createdAt'] != null ? DateTime.tryParse(json['createdAt'] as String) : null,
-      ride: ride,
+      ride: ride ?? (json['ride'] != null ? Ride.fromJson(json['ride'] as Map<String, dynamic>) : null),
     );
   }
 
@@ -72,56 +72,12 @@ final myBookingsProvider = FutureProvider<List<PassengerBooking>>((ref) async {
       .map((e) => PassengerBooking.fromJson(e as Map<String, dynamic>))
       .toList();
 
-  if (bookings.isEmpty) {
-    return [];
-  }
-
-  // 2. Costruisci la rideMap usando rides/search (OPEN) + rides/my?status=IN_PROGRESS
-  // rides/search restituisce solo OPEN, rides/my restituisce le proprie corse come driver.
-  // Per le corse altrui IN_PROGRESS non abbiamo un endpoint diretto, ma possiamo
-  // usare rides/search senza filtro status per OPEN e tollerare null per le IN_PROGRESS.
-  final Map<String, Ride> rideMap = {};
-
-  try {
-    // Corse aperte (dove il passeggero può prenotare): rides/search → solo OPEN
-    final searchResponse = await apiClient.dio.get('rides/search');
-    if (searchResponse.statusCode == 200 && searchResponse.data != null) {
-      final ridesList = (searchResponse.data as List<dynamic>)
-          .map((e) => Ride.fromJson(e as Map<String, dynamic>))
-          .toList();
-      for (final r in ridesList) {
-        rideMap[r.id] = r;
-      }
-    }
-  } catch (_) {}
-
-  try {
-    // Corse in cui l'utente è driver e sono IN_PROGRESS (copre il caso driver/passeggero)
-    final inProgressResponse = await apiClient.dio.get(
-      'rides/my',
-      queryParameters: {'status': 'IN_PROGRESS'},
-    );
-    if (inProgressResponse.statusCode == 200 && inProgressResponse.data != null) {
-      final ridesList = (inProgressResponse.data as List<dynamic>)
-          .map((e) => Ride.fromJson(e as Map<String, dynamic>))
-          .toList();
-      for (final r in ridesList) {
-        rideMap[r.id] = r;
-      }
-    }
-  } catch (_) {}
-
-  // 3. Associa ogni booking alla sua corsa e filtra:
-  //    - Se ride trovata: mostra solo se OPEN o IN_PROGRESS
-  //    - Se ride NON trovata (es. corsa completata non accessibile via search): escludi
-  return bookings
-      .map((b) => b.copyWith(ride: rideMap[b.rideId]))
-      .where((b) {
-        final rideStatus = b.ride?.status;
-        if (rideStatus == null) return false; // corsa non trovata = completata o cancellata
-        return rideStatus == 'OPEN' || rideStatus == 'IN_PROGRESS';
-      })
-      .toList();
+  // 2. Filtra per mostrare solo prenotazioni per corse attive (OPEN o IN_PROGRESS)
+  return bookings.where((b) {
+    final rideStatus = b.ride?.status;
+    if (rideStatus == null) return false; // corsa non trovata = completata o cancellata
+    return rideStatus == 'OPEN' || rideStatus == 'IN_PROGRESS';
+  }).toList();
 });
 
 
