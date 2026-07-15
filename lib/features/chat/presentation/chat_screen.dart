@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
 import 'chat_controller.dart';
 import '../../auth/domain/user_profile.dart';
@@ -99,6 +100,24 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     final activeChatsAsync = ref.watch(activeChatsProvider);
 
     return Scaffold(
+      appBar: AppBar(
+        backgroundColor: AppColors.deepBlack,
+        elevation: 0,
+        leading: IconButton(
+          icon: const Icon(Icons.menu, color: Colors.white),
+          onPressed: () => context.go('/impostazioni'),
+        ),
+        title: const Text(
+          'Chat',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.notifications_none_outlined, color: Colors.white),
+            onPressed: () => context.push('/notifiche'),
+          ),
+        ],
+      ),
       body: activeChatsAsync.when(
         data: (rides) {
           if (rides.isEmpty) {
