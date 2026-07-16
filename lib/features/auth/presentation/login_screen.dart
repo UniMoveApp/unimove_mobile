@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:go_router/go_router.dart';
 import '../../../shared/theme/app_theme.dart';
 import 'auth_controller.dart';
 
@@ -67,9 +66,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _passwordController.text,
     );
 
-    if (success && mounted) {
-      context.go('/benvenuto');
-    } else if (!success && mounted) {
+    if (!success && mounted) {
       final error = ref.read(authControllerProvider).errorMessage;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(

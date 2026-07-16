@@ -51,6 +51,7 @@ class _RideMapScreenState extends ConsumerState<RideMapScreen> {
     try {
       // 1. Verifica ed eventualmente richiedi i permessi
       bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!mounted) return;
       if (!serviceEnabled) {
         setState(() {
           _errorMessage = 'I servizi di localizzazione sono disattivati. Attivali nelle impostazioni.';
@@ -60,8 +61,10 @@ class _RideMapScreenState extends ConsumerState<RideMapScreen> {
       }
 
       LocationPermission permission = await Geolocator.checkPermission();
+      if (!mounted) return;
       if (permission == LocationPermission.denied) {
         permission = await Geolocator.requestPermission();
+        if (!mounted) return;
         if (permission == LocationPermission.denied) {
           setState(() {
             _errorMessage = 'Permesso di geolocalizzazione negato.';
@@ -83,6 +86,7 @@ class _RideMapScreenState extends ConsumerState<RideMapScreen> {
       Position position = await Geolocator.getCurrentPosition(
         desiredAccuracy: LocationAccuracy.high,
       );
+      if (!mounted) return;
       final initialLatLng = LatLng(position.latitude, position.longitude);
 
       setState(() {
@@ -92,6 +96,7 @@ class _RideMapScreenState extends ConsumerState<RideMapScreen> {
 
       // 3. Invia la prima posizione al backend
       await _sendLocationToBackend(initialLatLng);
+      if (!mounted) return;
 
       // 4. Avvia il timer di polling per aggiornare e inviare la posizione ogni 10 secondi
       _locationTimer = Timer.periodic(const Duration(seconds: 10), (timer) async {
@@ -99,6 +104,7 @@ class _RideMapScreenState extends ConsumerState<RideMapScreen> {
           Position pos = await Geolocator.getCurrentPosition(
             desiredAccuracy: LocationAccuracy.high,
           );
+          if (!mounted) return;
           final latLng = LatLng(pos.latitude, pos.longitude);
           setState(() {
             _driverPosition = latLng;
@@ -110,6 +116,7 @@ class _RideMapScreenState extends ConsumerState<RideMapScreen> {
       });
 
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Errore durante l\'inizializzazione del tracciamento GPS.';
         _loading = false;
@@ -148,6 +155,7 @@ class _RideMapScreenState extends ConsumerState<RideMapScreen> {
     try {
       final apiClient = ref.read(apiClientProvider);
       final response = await apiClient.dio.get('rides/${widget.ride.id}/location');
+      if (!mounted) return;
       
       if (response.statusCode == 200 && response.data != null) {
         final lat = response.data['latitude'] as double;
@@ -161,6 +169,7 @@ class _RideMapScreenState extends ConsumerState<RideMapScreen> {
         });
       }
     } on DioException catch (e) {
+      if (!mounted) return;
       if (e.response?.statusCode == 404) {
         setState(() {
           _errorMessage = 'L\'autista non ha ancora avviato la condivisione della posizione.';
@@ -173,6 +182,7 @@ class _RideMapScreenState extends ConsumerState<RideMapScreen> {
         });
       }
     } catch (e) {
+      if (!mounted) return;
       setState(() {
         _errorMessage = 'Errore nel caricamento della posizione.';
         _loading = false;

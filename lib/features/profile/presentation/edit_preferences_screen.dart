@@ -274,13 +274,22 @@ class _EditPreferencesScreenState extends ConsumerState<EditPreferencesScreen> {
   Future<void> _savePreferences() async {
     setState(() => _isSaving = true);
     
+    final currentProfile = ref.read(userProfileProvider).value;
+    String notes = '';
+    if (currentProfile?.travelPreferences != null) {
+      final index = currentProfile!.travelPreferences!.indexOf('|');
+      if (index != -1) {
+        notes = currentProfile.travelPreferences!.substring(index);
+      }
+    }
+
     final travelPrefsStr = TravelPreferences(
       music: _music,
       talk: _talk,
       animals: _animals,
       smoke: _smoke,
       ac: _ac,
-    ).toString();
+    ).toString() + notes;
 
     final success = await ref
         .read(profileControllerProvider.notifier)

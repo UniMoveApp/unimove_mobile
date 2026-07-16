@@ -126,9 +126,10 @@ class NotificationsController extends StateNotifier<AsyncValue<List<Notification
 
     int backoff = 1;
 
-    while (_ref.read(authControllerProvider).status == AuthStatus.authenticated) {
+    while (mounted && _ref.read(authControllerProvider).status == AuthStatus.authenticated) {
       try {
         final token = await _authService.getToken();
+        if (!mounted) return;
         if (token == null) {
           await Future.delayed(const Duration(seconds: 5));
           continue;
@@ -146,7 +147,17 @@ class NotificationsController extends StateNotifier<AsyncValue<List<Notification
         _sseRequest!.headers.set('Accept', 'text/event-stream');
         _sseRequest!.headers.set('Cache-Control', 'no-cache');
 
+        if (!mounted) {
+          _cleanupSse();
+          return;
+        }
+
         final response = await _sseRequest!.close();
+        if (!mounted) {
+          _cleanupSse();
+          return;
+        }
+
         if (response.statusCode != 200) {
           throw HttpException('Errore SSE: ${response.statusCode}');
         }
@@ -159,6 +170,7 @@ class NotificationsController extends StateNotifier<AsyncValue<List<Notification
             .transform(const LineSplitter())
             .listen((line) {
           debugPrint('SSE RICEVUTO: $line');
+          if (!mounted) return;
           if (line.startsWith('data:')) {
             final dataStr = line.substring(5).trim();
             if (dataStr.isNotEmpty && dataStr != 'Connected') {
@@ -170,6 +182,9 @@ class NotificationsController extends StateNotifier<AsyncValue<List<Notification
                 final currentList = state.value ?? [];
                 if (!currentList.any((n) => n.id == notification.id)) {
                   state = AsyncValue.data([notification, ...currentList]);
+                  if (notification.type == 'NEW_REVIEW') {
+                    _ref.invalidate(userProfileProvider);
+                  }
                 }
               } catch (e) {
                 debugPrint('Errore parsing notifica SSE: $e');
@@ -185,12 +200,13 @@ class NotificationsController extends StateNotifier<AsyncValue<List<Notification
         });
 
         // Rimaniamo in attesa finché la sottoscrizione è attiva
-        while (_sseSubscription != null) {
+        while (mounted && _sseSubscription != null) {
           await Future.delayed(const Duration(seconds: 1));
         }
       } catch (e) {
         debugPrint('Connessione SSE persa: $e. Riconnessione in $backoff secondi...');
         _cleanupSse();
+        if (!mounted) return;
         await Future.delayed(Duration(seconds: backoff));
         backoff = (backoff * 2).clamp(1, 60);
       }

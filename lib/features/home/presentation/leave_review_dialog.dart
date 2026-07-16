@@ -133,136 +133,138 @@ class _LeaveReviewDialogState extends ConsumerState<LeaveReviewDialog> {
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
       padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 28),
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: [
-          // Drag handle
-          Center(
-            child: Container(
-              width: 40,
-              height: 4,
-              decoration: BoxDecoration(
-                color: Colors.white24,
-                borderRadius: BorderRadius.circular(2),
-              ),
-            ),
-          ),
-          const SizedBox(height: 24),
-
-          // Title
-          const Text(
-            'Lascia una recensione',
-            style: TextStyle(
-              fontSize: 20,
-              fontWeight: FontWeight.bold,
-              color: AppColors.textPrimary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 8),
-
-          // Driver Name
-          Text(
-            'Come è stato il tuo viaggio con ${widget.driverName}?',
-            style: const TextStyle(
-              fontSize: 15,
-              color: AppColors.textSecondary,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-
-          // Interactive Stars Row
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: List.generate(5, (index) {
-              final starValue = index + 1;
-              final isFilled = starValue <= _rating;
-              return GestureDetector(
-                onTap: _isSubmitting ? null : () {
-                  setState(() => _rating = starValue);
-                },
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 6.0),
-                  child: Icon(
-                    isFilled ? Icons.star : Icons.star_border,
-                    color: isFilled ? AppColors.universityGreen : Colors.white24,
-                    size: 40,
-                  ),
+      child: SingleChildScrollView(
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: [
+            // Drag handle
+            Center(
+              child: Container(
+                width: 40,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: Colors.white24,
+                  borderRadius: BorderRadius.circular(2),
                 ),
-              );
-            }),
-          ),
-          const SizedBox(height: 8),
-
-          // Rating textual label
-          Text(
-            _ratingLabels[_rating] ?? '',
-            style: const TextStyle(
-              color: AppColors.universityGreen,
-              fontWeight: FontWeight.bold,
-              fontSize: 14,
-            ),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 24),
-
-          // Optional Comment Text Field
-          TextField(
-            controller: _commentController,
-            maxLines: 4,
-            maxLength: 500,
-            enabled: !_isSubmitting,
-            style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
-            decoration: InputDecoration(
-              hintText: 'Scrivi un commento opzionale...',
-              hintStyle: const TextStyle(color: AppColors.textMuted),
-              fillColor: AppColors.deepBlack,
-              filled: true,
-              counterStyle: const TextStyle(color: AppColors.textMuted),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: Colors.white10),
-              ),
-              focusedBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(16),
-                borderSide: const BorderSide(color: AppColors.universityGreen, width: 2),
               ),
             ),
-          ),
-          const SizedBox(height: 24),
+            const SizedBox(height: 24),
 
-          // Send Button
-          ElevatedButton(
-            onPressed: _isSubmitting ? null : _submitReview,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: AppColors.universityGreen,
-              disabledBackgroundColor: AppColors.universityGreen.withValues(alpha: 0.5),
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(16),
+            // Title
+            const Text(
+              'Lascia una recensione',
+              style: TextStyle(
+                fontSize: 20,
+                fontWeight: FontWeight.bold,
+                color: AppColors.textPrimary,
               ),
+              textAlign: TextAlign.center,
             ),
-            child: _isSubmitting
-                ? const SizedBox(
-                    height: 20,
-                    width: 20,
-                    child: CircularProgressIndicator(
-                      color: Colors.white,
-                      strokeWidth: 2,
-                    ),
-                  )
-                : const Text(
-                    'Invia Recensione',
-                    style: TextStyle(
-                      fontSize: 16,
-                      fontWeight: FontWeight.bold,
-                      color: Colors.white,
+            const SizedBox(height: 8),
+
+            // Driver Name
+            Text(
+              'Come è stato il tuo viaggio con ${widget.driverName}?',
+              style: const TextStyle(
+                fontSize: 15,
+                color: AppColors.textSecondary,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+
+            // Interactive Stars Row
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: List.generate(5, (index) {
+                final starValue = index + 1;
+                final isFilled = starValue <= _rating;
+                return GestureDetector(
+                  onTap: _isSubmitting ? null : () {
+                    setState(() => _rating = starValue);
+                  },
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 6.0),
+                    child: Icon(
+                      isFilled ? Icons.star : Icons.star_border,
+                      color: isFilled ? AppColors.universityGreen : Colors.white24,
+                      size: 40,
                     ),
                   ),
-          ),
-        ],
+                );
+              }),
+            ),
+            const SizedBox(height: 8),
+
+            // Rating textual label
+            Text(
+              _ratingLabels[_rating] ?? '',
+              style: const TextStyle(
+                color: AppColors.universityGreen,
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 24),
+
+            // Optional Comment Text Field
+            TextField(
+              controller: _commentController,
+              maxLines: 4,
+              maxLength: 500,
+              enabled: !_isSubmitting,
+              style: const TextStyle(color: AppColors.textPrimary, fontSize: 15),
+              decoration: InputDecoration(
+                hintText: 'Scrivi un commento opzionale...',
+                hintStyle: const TextStyle(color: AppColors.textMuted),
+                fillColor: AppColors.deepBlack,
+                filled: true,
+                counterStyle: const TextStyle(color: AppColors.textMuted),
+                enabledBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: Colors.white10),
+                ),
+                focusedBorder: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(16),
+                  borderSide: const BorderSide(color: AppColors.universityGreen, width: 2),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+
+            // Send Button
+            ElevatedButton(
+              onPressed: _isSubmitting ? null : _submitReview,
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppColors.universityGreen,
+                disabledBackgroundColor: AppColors.universityGreen.withValues(alpha: 0.5),
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+              ),
+              child: _isSubmitting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : const Text(
+                      'Invia Recensione',
+                      style: TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+            ),
+          ],
+        ),
       ),
     );
   }
