@@ -23,7 +23,7 @@ class NotificationModel {
       userId: json['userId'] as String,
       type: json['type'] as String,
       message: json['message'] as String,
-      isRead: json['isRead'] as bool? ?? false,
+      isRead: (json['isRead'] ?? json['read']) as bool? ?? false,
       rideId: json['rideId'] as String?,
       createdAt: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)

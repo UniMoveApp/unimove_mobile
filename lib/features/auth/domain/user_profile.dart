@@ -203,8 +203,9 @@ class TravelPreferences {
   });
 
   factory TravelPreferences.fromString(String prefStr) {
-    // Expected format: "music:1,talk:2,animals:0,smoke:0,ac:1" or similar
-    final parts = prefStr.split(',');
+    // Expected format: "music:1,talk:2,animals:0,smoke:0,ac:1" or "music:1...|notes"
+    final cleanPrefStr = prefStr.split('|').first;
+    final parts = cleanPrefStr.split(',');
     PreferenceLevel music = PreferenceLevel.neutral;
     PreferenceLevel talk = PreferenceLevel.neutral;
     PreferenceLevel animals = PreferenceLevel.neutral;

@@ -5,6 +5,7 @@ import '../../../core/data/comuni_molise.dart';
 import '../../../core/services/auth_service.dart';
 import '../../../shared/theme/app_theme.dart';
 import '../../profile/presentation/routes_controller.dart';
+import 'auth_controller.dart';
 
 class WelcomeRoutesScreen extends ConsumerStatefulWidget {
   const WelcomeRoutesScreen({super.key});
@@ -99,7 +100,7 @@ class _WelcomeRoutesScreenState extends ConsumerState<WelcomeRoutesScreen> {
     }
 
     // Segna l'onboarding come completato e vai alla home
-    await ref.read(authServiceProvider).setOnboardingCompleted();
+    await ref.read(authControllerProvider.notifier).completeWelcome();
     
     setState(() => _isLoading = false);
 

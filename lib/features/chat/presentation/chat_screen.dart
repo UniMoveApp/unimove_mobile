@@ -51,6 +51,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
             longitude: mockLng,
           );
 
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Posizione condivisa con successo!'),
@@ -59,6 +60,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
         ),
       );
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.toString().replaceAll('Exception: ', '')),
@@ -78,6 +80,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
     try {
       await ref.read(chatServiceProvider).sendMessage(_selectedRide!.id, text);
     } catch (e) {
+      if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(e.toString().replaceAll('Exception: ', '')),
@@ -129,7 +132,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                   children: [
                     Container(
                       padding: const EdgeInsets.all(24),
-                      decoration: BoxDecoration(
+                      decoration: const BoxDecoration(
                         color: AppColors.surfaceDark,
                         shape: BoxShape.circle,
                       ),
@@ -187,8 +190,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                         CircleAvatar(
                           radius: 28,
                           backgroundColor: isDriver
-                              ? AppColors.universityGreen.withOpacity(0.15)
-                              : Colors.blueAccent.withOpacity(0.15),
+                              ? AppColors.universityGreen.withValues(alpha: 0.15)
+                              : Colors.blueAccent.withValues(alpha: 0.15),
                           child: Icon(
                             isDriver ? Icons.drive_eta : Icons.person_pin_circle,
                             color: isDriver ? AppColors.universityGreen : Colors.blueAccent,
@@ -232,8 +235,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                           decoration: BoxDecoration(
                             color: ride.status == 'IN_PROGRESS'
-                                ? Colors.orange.withOpacity(0.2)
-                                : AppColors.universityGreen.withOpacity(0.2),
+                                ? Colors.orange.withValues(alpha: 0.2)
+                                : AppColors.universityGreen.withValues(alpha: 0.2),
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -387,8 +390,8 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   if (msg.latitude != null && msg.longitude != null) ...[
-                                    Row(
-                                      children: const [
+                                    const Row(
+                                      children: [
                                         Icon(Icons.location_on, color: Colors.redAccent, size: 20),
                                         SizedBox(width: 8),
                                         Text(
