@@ -5,7 +5,7 @@ class Ride {
   final String departureCity;
   final DateTime departureTime;
   final String arrivalCity;
-  final DateTime arrivalTimeEst;
+  final DateTime? arrivalTimeEst;
   final List<String> hotspots;
   final String? vehicleModel;
   final String? vehiclePlate;
@@ -21,7 +21,7 @@ class Ride {
     required this.departureCity,
     required this.departureTime,
     required this.arrivalCity,
-    required this.arrivalTimeEst,
+    this.arrivalTimeEst,
     required this.hotspots,
     this.vehicleModel,
     this.vehiclePlate,
@@ -39,8 +39,13 @@ class Ride {
       departureCity: json['departureCity'] as String? ?? '',
       departureTime: DateTime.parse(json['departureTime'] as String),
       arrivalCity: json['arrivalCity'] as String? ?? '',
-      arrivalTimeEst: DateTime.parse(json['arrivalTimeEst'] as String),
-      hotspots: (json['hotspots'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      arrivalTimeEst: json['arrivalTimeEst'] != null
+          ? DateTime.tryParse(json['arrivalTimeEst'] as String)
+          : null,
+      hotspots: (json['hotspots'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       vehicleModel: json['vehicleModel'] as String?,
       vehiclePlate: json['vehiclePlate'] as String?,
       totalSeats: json['totalSeats'] as int? ?? 0,
@@ -156,7 +161,10 @@ class UserProfile {
       travelPreferences: json['travelPreferences'] as String?,
       iban: json['iban'] as String?,
       ibanHolder: json['ibanHolder'] as String?,
-      favoriteRoutes: (json['favoriteRoutes'] as List<dynamic>?)?.map((e) => e as String).toList() ?? [],
+      favoriteRoutes: (json['favoriteRoutes'] as List<dynamic>?)
+              ?.map((e) => e as String)
+              .toList() ??
+          [],
       upcomingRides: (json['upcomingRides'] as List<dynamic>?)
               ?.map((e) => Ride.fromJson(e as Map<String, dynamic>))
               .toList() ??
@@ -225,7 +233,8 @@ class TravelPreferences {
         if (key == 'ac') ac = level;
       }
     }
-    return TravelPreferences(music: music, talk: talk, animals: animals, smoke: smoke, ac: ac);
+    return TravelPreferences(
+        music: music, talk: talk, animals: animals, smoke: smoke, ac: ac);
   }
 
   @override
@@ -279,7 +288,9 @@ class UserReview {
       comment: json['comment'] as String? ?? '',
       date: json['createdAt'] != null
           ? DateTime.parse(json['createdAt'] as String)
-          : (json['date'] != null ? DateTime.parse(json['date'] as String) : DateTime.now()),
+          : (json['date'] != null
+              ? DateTime.parse(json['date'] as String)
+              : DateTime.now()),
     );
   }
 }
@@ -293,6 +304,7 @@ enum PreferenceLevel {
   const PreferenceLevel(this.value);
 
   static PreferenceLevel fromInt(int value) {
-    return PreferenceLevel.values.firstWhere((e) => e.value == value, orElse: () => PreferenceLevel.neutral);
+    return PreferenceLevel.values.firstWhere((e) => e.value == value,
+        orElse: () => PreferenceLevel.neutral);
   }
 }

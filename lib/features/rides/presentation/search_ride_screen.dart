@@ -74,13 +74,12 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
     return "${time.hour.toString().padLeft(2, '0')}:${time.minute.toString().padLeft(2, '0')}";
   }
 
-
-
   // Trigger search API call
   Future<void> _performSearch() async {
     if (!_formKey.currentState!.validate()) {
       setState(() {
-        _validationErrorMessage = 'Seleziona la data di partenza obbligatoria (*)';
+        _validationErrorMessage =
+            'Seleziona la data di partenza obbligatoria (*)';
       });
       return;
     }
@@ -120,7 +119,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
 
       if (response.statusCode == 200 && response.data != null) {
         final list = response.data as List<dynamic>;
-        final fetchedRides = list.map((e) => Ride.fromJson(e as Map<String, dynamic>)).toList();
+        final fetchedRides =
+            list.map((e) => Ride.fromJson(e as Map<String, dynamic>)).toList();
 
         setState(() {
           _allRides = fetchedRides;
@@ -130,7 +130,10 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
         throw Exception("Risposta non valida dal server");
       }
     } on DioException catch (e) {
-      final errorMessage = e.response?.data?['error'] ?? e.response?.data?['message'] ?? e.message ?? 'Si è verificato un errore durante la ricerca.';
+      final errorMessage = e.response?.data?['error'] ??
+          e.response?.data?['message'] ??
+          e.message ??
+          'Si è verificato un errore durante la ricerca.';
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -172,7 +175,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
 
       // 2. arrivalTimeEst filter (must be <= selected time on the selected date)
       if (_selectedArrivalTimeEst != null) {
-        final rideArrTime = TimeOfDay.fromDateTime(ride.arrivalTimeEst);
+        final rideArrTime =
+            TimeOfDay.fromDateTime(ride.arrivalTimeEst ?? DateTime.now());
         if (rideArrTime.hour > _selectedArrivalTimeEst!.hour ||
             (rideArrTime.hour == _selectedArrivalTimeEst!.hour &&
                 rideArrTime.minute > _selectedArrivalTimeEst!.minute)) {
@@ -200,7 +204,13 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
   // Preferences mapping heuristic for card visualization
   Map<String, bool> _parseRidePreferences(String? travelPrefsText) {
     if (travelPrefsText == null || travelPrefsText.isEmpty) {
-      return {'music': true, 'talk': true, 'animals': false, 'smoke': false, 'ac': true};
+      return {
+        'music': true,
+        'talk': true,
+        'animals': false,
+        'smoke': false,
+        'ac': true
+      };
     }
 
     final parts = travelPrefsText.split('|');
@@ -221,18 +231,33 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
     // Fallback: use keyword heuristic on the entire text
     final note = travelPrefsText.toLowerCase();
     return {
-      'music': !(note.contains('no musica') || note.contains('senza musica') || note.contains('no music')),
-      'talk': !(note.contains('no chiacchiere') || note.contains('no conversazione') || note.contains('no talk') || note.contains('silenzio')),
-      'animals': note.contains('animali ammessi') || note.contains('accetto animali') || note.contains('cani ok') || note.contains('pets ok') || note.contains('animali ok'),
-      'smoke': note.contains('si fuma') || note.contains('fumo ok') || note.contains('fumo consentito') || note.contains('fumatori'),
-      'ac': !(note.contains('no ac') || note.contains('no aria condizionata') || note.contains('senza aria')),
+      'music': !(note.contains('no musica') ||
+          note.contains('senza musica') ||
+          note.contains('no music')),
+      'talk': !(note.contains('no chiacchiere') ||
+          note.contains('no conversazione') ||
+          note.contains('no talk') ||
+          note.contains('silenzio')),
+      'animals': note.contains('animali ammessi') ||
+          note.contains('accetto animali') ||
+          note.contains('cani ok') ||
+          note.contains('pets ok') ||
+          note.contains('animali ok'),
+      'smoke': note.contains('si fuma') ||
+          note.contains('fumo ok') ||
+          note.contains('fumo consentito') ||
+          note.contains('fumatori'),
+      'ac': !(note.contains('no ac') ||
+          note.contains('no aria condizionata') ||
+          note.contains('senza aria')),
     };
   }
 
   // Booking action: opens modal to select hotspot
   void _openBookingSheet(Ride ride) {
     final currentProfile = ref.read(userProfileProvider).value;
-    if (currentProfile != null && currentProfile.username == ride.driverUsername) {
+    if (currentProfile != null &&
+        currentProfile.username == ride.driverUsername) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
           content: Text('Non puoi prenotare la tua stessa corsa!'),
@@ -245,7 +270,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
 
     // Collect all options for hotspots (departure city and intermediate stops)
     final hotspotOptions = <String>[];
-    hotspotOptions.add(ride.departureCity); // Default meeting point is departure city
+    hotspotOptions
+        .add(ride.departureCity); // Default meeting point is departure city
     hotspotOptions.addAll(ride.hotspots);
 
     String selectedHotspot = hotspotOptions.first;
@@ -299,17 +325,22 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                             final option = hotspotOptions[index];
                             final isDeparture = index == 0;
 
-                            final subLabel = isDeparture ? 'Punto di partenza' : 'Fermata intermedia';
+                            final subLabel = isDeparture
+                                ? 'Punto di partenza'
+                                : 'Fermata intermedia';
 
                             return RadioListTile<String>(
                               value: option,
                               title: Text(
                                 option,
-                                style: const TextStyle(color: AppColors.textPrimary, fontWeight: FontWeight.bold),
+                                style: const TextStyle(
+                                    color: AppColors.textPrimary,
+                                    fontWeight: FontWeight.bold),
                               ),
                               subtitle: Text(
                                 subLabel,
-                                style: const TextStyle(color: AppColors.textMuted, fontSize: 12),
+                                style: const TextStyle(
+                                    color: AppColors.textMuted, fontSize: 12),
                               ),
                               activeColor: AppColors.universityGreen,
                               contentPadding: EdgeInsets.zero,
@@ -339,11 +370,13 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
 
                                   if (!context.mounted) return;
 
-                                  if (response.statusCode == 200 || response.statusCode == 201) {
+                                  if (response.statusCode == 200 ||
+                                      response.statusCode == 201) {
                                     // Refresh user profile upcoming rides, bookings & reviews
                                     ref.invalidate(userProfileProvider);
                                     ref.invalidate(myBookingsProvider);
-                                    Navigator.pop(context); // Close bottom sheet
+                                    Navigator.pop(
+                                        context); // Close bottom sheet
 
                                     // Show success dialog
                                     showDialog(
@@ -352,35 +385,47 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                                       builder: (context) => AlertDialog(
                                         backgroundColor: AppColors.surfaceDark,
                                         shape: RoundedRectangleBorder(
-                                          borderRadius: BorderRadius.circular(20),
-                                          side: BorderSide(color: Colors.white.withValues(alpha: 0.1)),
+                                          borderRadius:
+                                              BorderRadius.circular(20),
+                                          side: BorderSide(
+                                              color: Colors.white
+                                                  .withValues(alpha: 0.1)),
                                         ),
                                         title: const Row(
                                           children: [
-                                            Icon(Icons.check_circle_outline, color: AppColors.universityGreen, size: 28),
+                                            Icon(Icons.check_circle_outline,
+                                                color:
+                                                    AppColors.universityGreen,
+                                                size: 28),
                                             SizedBox(width: 10),
                                             Expanded(
                                               child: Text(
                                                 'Prenotazione Inviata!',
-                                                style: TextStyle(color: AppColors.textPrimary),
+                                                style: TextStyle(
+                                                    color:
+                                                        AppColors.textPrimary),
                                               ),
                                             ),
                                           ],
                                         ),
                                         content: Text(
                                           'La tua prenotazione per la corsa di ${ride.driverFullName} è stata registrata con successo.\n\nIncontro: $selectedHotspot',
-                                          style: const TextStyle(color: AppColors.textSecondary),
+                                          style: const TextStyle(
+                                              color: AppColors.textSecondary),
                                         ),
                                         actions: [
                                           TextButton(
                                             onPressed: () {
-                                              Navigator.pop(context); // Close dialog
-                                              context.go('/home'); // Back to home
+                                              Navigator.pop(
+                                                  context); // Close dialog
+                                              context
+                                                  .go('/home'); // Back to home
                                             },
                                             child: const Text(
                                               'OK',
                                               style: TextStyle(
-                                                color: AppColors.universityGreen,
+                                                color:
+                                                    AppColors.universityGreen,
                                                 fontWeight: FontWeight.bold,
                                               ),
                                             ),
@@ -389,10 +434,14 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                                       ),
                                     );
                                   } else {
-                                    throw Exception('Impossibile completare la prenotazione');
+                                    throw Exception(
+                                        'Impossibile completare la prenotazione');
                                   }
                                 } on DioException catch (e) {
-                                  final errMsg = e.response?.data?['error'] ?? e.response?.data?['message'] ?? e.message ?? 'Errore durante la prenotazione.';
+                                  final errMsg = e.response?.data?['error'] ??
+                                      e.response?.data?['message'] ??
+                                      e.message ??
+                                      'Errore durante la prenotazione.';
                                   if (!context.mounted) return;
                                   Navigator.pop(context);
                                   ScaffoldMessenger.of(context).showSnackBar(
@@ -423,7 +472,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                           ),
                         ),
                         child: isSubmitting
-                            ? const CircularProgressIndicator(color: Colors.white)
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
                             : const Text(
                                 'Conferma Prenotazione',
                                 style: TextStyle(
@@ -484,7 +534,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                   decoration: const InputDecoration(
                     labelText: 'Username guidatore',
                     hintText: 'n.cognome',
-                    prefixIcon: Icon(Icons.person_outline, color: AppColors.universityGreen),
+                    prefixIcon: Icon(Icons.person_outline,
+                        color: AppColors.universityGreen),
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -496,7 +547,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                   decoration: const InputDecoration(
                     labelText: 'Data di partenza *',
                     hintText: 'dd/mm/aaaa',
-                    prefixIcon: Icon(Icons.calendar_today_outlined, color: AppColors.universityGreen),
+                    prefixIcon: Icon(Icons.calendar_today_outlined,
+                        color: AppColors.universityGreen),
                   ),
                   validator: (value) {
                     if (_selectedDate == null) {
@@ -508,7 +560,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                     final date = await showDatePicker(
                       context: context,
                       initialDate: _selectedDate ?? DateTime.now(),
-                      firstDate: DateTime.now().subtract(const Duration(days: 30)),
+                      firstDate:
+                          DateTime.now().subtract(const Duration(days: 30)),
                       lastDate: DateTime.now().add(const Duration(days: 365)),
                       builder: (context, child) {
                         return Theme(
@@ -550,7 +603,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                   decoration: const InputDecoration(
                     labelText: 'Orario di partenza',
                     hintText: 'hh:mm',
-                    prefixIcon: Icon(Icons.access_time_outlined, color: AppColors.universityGreen),
+                    prefixIcon: Icon(Icons.access_time_outlined,
+                        color: AppColors.universityGreen),
                   ),
                   onTap: () async {
                     final time = await showTimePicker(
@@ -596,7 +650,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                   decoration: const InputDecoration(
                     labelText: 'Orario stimato di arrivo',
                     hintText: 'hh:mm',
-                    prefixIcon: Icon(Icons.access_time_outlined, color: AppColors.universityGreen),
+                    prefixIcon: Icon(Icons.access_time_outlined,
+                        color: AppColors.universityGreen),
                   ),
                   onTap: () async {
                     final time = await showTimePicker(
@@ -638,7 +693,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                 DropdownButtonFormField<int>(
                   initialValue: _seatsFilter,
                   decoration: const InputDecoration(
-                    prefixIcon: Icon(Icons.airline_seat_recline_normal_outlined, color: AppColors.universityGreen),
+                    prefixIcon: Icon(Icons.airline_seat_recline_normal_outlined,
+                        color: AppColors.universityGreen),
                   ),
                   dropdownColor: AppColors.surfaceDark,
                   items: List.generate(8, (index) => index + 1)
@@ -668,19 +724,24 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    _buildPreferenceFilterBox(Icons.music_note_outlined, _musicFilter, () {
+                    _buildPreferenceFilterBox(
+                        Icons.music_note_outlined, _musicFilter, () {
                       setState(() => _musicFilter = !_musicFilter);
                     }),
-                    _buildPreferenceFilterBox(Icons.forum_outlined, _talkFilter, () {
+                    _buildPreferenceFilterBox(Icons.forum_outlined, _talkFilter,
+                        () {
                       setState(() => _talkFilter = !_talkFilter);
                     }),
-                    _buildPreferenceFilterBox(Icons.pets_outlined, _animalsFilter, () {
+                    _buildPreferenceFilterBox(
+                        Icons.pets_outlined, _animalsFilter, () {
                       setState(() => _animalsFilter = !_animalsFilter);
                     }),
-                    _buildPreferenceFilterBox(Icons.smoking_rooms_outlined, _smokeFilter, () {
+                    _buildPreferenceFilterBox(
+                        Icons.smoking_rooms_outlined, _smokeFilter, () {
                       setState(() => _smokeFilter = !_smokeFilter);
                     }),
-                    _buildPreferenceFilterBox(Icons.ac_unit_outlined, _acFilter, () {
+                    _buildPreferenceFilterBox(Icons.ac_unit_outlined, _acFilter,
+                        () {
                       setState(() => _acFilter = !_acFilter);
                     }),
                   ],
@@ -689,7 +750,10 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                   Center(
                     child: Text(
                       _validationErrorMessage!,
-                      style: const TextStyle(color: Colors.redAccent, fontSize: 14, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          color: Colors.redAccent,
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold),
                       textAlign: TextAlign.center,
                     ),
                   ),
@@ -729,17 +793,22 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
   }
 
   // Preference Box filter widget
-  Widget _buildPreferenceFilterBox(IconData icon, bool isActive, VoidCallback onTap) {
+  Widget _buildPreferenceFilterBox(
+      IconData icon, bool isActive, VoidCallback onTap) {
     return GestureDetector(
       onTap: onTap,
       child: Container(
         width: 50,
         height: 50,
         decoration: BoxDecoration(
-          color: isActive ? AppColors.universityGreen.withValues(alpha: 0.15) : AppColors.surfaceDark,
+          color: isActive
+              ? AppColors.universityGreen.withValues(alpha: 0.15)
+              : AppColors.surfaceDark,
           borderRadius: BorderRadius.circular(12),
           border: Border.all(
-            color: isActive ? AppColors.universityGreen : Colors.white.withValues(alpha: 0.05),
+            color: isActive
+                ? AppColors.universityGreen
+                : Colors.white.withValues(alpha: 0.05),
             width: isActive ? 1.5 : 1,
           ),
         ),
@@ -827,7 +896,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            const Icon(Icons.search_off_outlined, size: 72, color: AppColors.textMuted),
+            const Icon(Icons.search_off_outlined,
+                size: 72, color: AppColors.textMuted),
             const SizedBox(height: 20),
             const Text(
               'Nessuna corsa trovata',
@@ -857,7 +927,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
               icon: const Icon(Icons.edit_outlined),
               label: const Text('Modifica ricerca'),
               style: ElevatedButton.styleFrom(
-                padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(12),
                 ),
@@ -907,9 +978,12 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                 children: [
                   CircleAvatar(
                     radius: 20,
-                    backgroundColor: AppColors.universityGreen.withValues(alpha: 0.15),
+                    backgroundColor:
+                        AppColors.universityGreen.withValues(alpha: 0.15),
                     child: Text(
-                      ride.driverFullName.isNotEmpty ? ride.driverFullName[0].toUpperCase() : 'U',
+                      ride.driverFullName.isNotEmpty
+                          ? ride.driverFullName[0].toUpperCase()
+                          : 'U',
                       style: const TextStyle(
                         color: AppColors.universityGreen,
                         fontWeight: FontWeight.bold,
@@ -945,7 +1019,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                     ),
                   ),
                   Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                     decoration: BoxDecoration(
                       color: AppColors.universityGreen.withValues(alpha: 0.1),
                       borderRadius: BorderRadius.circular(8),
@@ -974,13 +1049,15 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                   // vertical dot connector
                   Column(
                     children: [
-                      const Icon(Icons.radio_button_checked, color: AppColors.universityGreen, size: 16),
+                      const Icon(Icons.radio_button_checked,
+                          color: AppColors.universityGreen, size: 16),
                       Container(
                         width: 2,
                         height: 36,
                         color: Colors.white10,
                       ),
-                      const Icon(Icons.location_on, color: AppColors.universityGreen, size: 16),
+                      const Icon(Icons.location_on,
+                          color: AppColors.universityGreen, size: 16),
                     ],
                   ),
                   const SizedBox(width: 12),
@@ -1001,7 +1078,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                               ),
                             ),
                             Text(
-                              _formatTimeOfDay(TimeOfDay.fromDateTime(ride.departureTime)),
+                              _formatTimeOfDay(
+                                  TimeOfDay.fromDateTime(ride.departureTime)),
                               style: const TextStyle(
                                 color: AppColors.universityGreen,
                                 fontWeight: FontWeight.bold,
@@ -1024,7 +1102,8 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                               ),
                             ),
                             Text(
-                              _formatTimeOfDay(TimeOfDay.fromDateTime(ride.arrivalTimeEst)),
+                              _formatTimeOfDay(TimeOfDay.fromDateTime(
+                                  ride.arrivalTimeEst ?? DateTime.now())),
                               style: const TextStyle(
                                 color: AppColors.universityGreen,
                                 fontWeight: FontWeight.bold,
@@ -1044,11 +1123,13 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
               // Date info
               Row(
                 children: [
-                  const Icon(Icons.calendar_today, size: 14, color: AppColors.textSecondary),
+                  const Icon(Icons.calendar_today,
+                      size: 14, color: AppColors.textSecondary),
                   const SizedBox(width: 6),
                   Text(
                     'Data: ${_formatDate(ride.departureTime)}',
-                    style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                    style: const TextStyle(
+                        color: AppColors.textSecondary, fontSize: 13),
                   ),
                 ],
               ),
@@ -1059,12 +1140,14 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                 Row(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    const Icon(Icons.alt_route_outlined, size: 14, color: AppColors.textSecondary),
+                    const Icon(Icons.alt_route_outlined,
+                        size: 14, color: AppColors.textSecondary),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         'Fermate: ${ride.hotspots.join(", ")}',
-                        style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                        style: const TextStyle(
+                            color: AppColors.textSecondary, fontSize: 13),
                       ),
                     ),
                   ],
@@ -1072,35 +1155,43 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
               ],
 
               // Vehicle if any
-              if (ride.vehicleModel != null && ride.vehicleModel!.isNotEmpty) ...[
+              if (ride.vehicleModel != null &&
+                  ride.vehicleModel!.isNotEmpty) ...[
                 const SizedBox(height: 8),
                 Row(
                   children: [
-                    const Icon(Icons.directions_car, size: 14, color: AppColors.textSecondary),
+                    const Icon(Icons.directions_car,
+                        size: 14, color: AppColors.textSecondary),
                     const SizedBox(width: 6),
                     Text(
                       'Veicolo: ${ride.vehicleModel} ${ride.vehiclePlate != null ? "(${ride.vehiclePlate})" : ""}',
-                      style: const TextStyle(color: AppColors.textSecondary, fontSize: 13),
+                      style: const TextStyle(
+                          color: AppColors.textSecondary, fontSize: 13),
                     ),
                   ],
                 ),
               ],
 
               // Note box if text notes exist
-              if (ride.travelPreferences != null && ride.travelPreferences!.trim().isNotEmpty) ...[
+              if (ride.travelPreferences != null &&
+                  ride.travelPreferences!.trim().isNotEmpty) ...[
                 ...(() {
                   final parts = ride.travelPreferences!.split('|');
-                  final displayNote = parts.length > 1 ? parts[1] : (parts.first.contains('music:') ? '' : parts.first);
+                  final displayNote = parts.length > 1
+                      ? parts[1]
+                      : (parts.first.contains('music:') ? '' : parts.first);
                   if (displayNote.trim().isEmpty) return <Widget>[];
                   return <Widget>[
                     const SizedBox(height: 12),
                     Container(
                       width: double.infinity,
-                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 12, vertical: 8),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.02),
                         borderRadius: BorderRadius.circular(10),
-                        border: Border.all(color: Colors.white.withValues(alpha: 0.03)),
+                        border: Border.all(
+                            color: Colors.white.withValues(alpha: 0.03)),
                       ),
                       child: Text(
                         'Note: "$displayNote"',
@@ -1126,15 +1217,20 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
                       scrollDirection: Axis.horizontal,
                       child: Row(
                         children: [
-                          _buildCardPreferenceIcon(Icons.music_note_outlined, ridePrefs['music']!),
+                          _buildCardPreferenceIcon(
+                              Icons.music_note_outlined, ridePrefs['music']!),
                           const SizedBox(width: 6),
-                          _buildCardPreferenceIcon(Icons.forum_outlined, ridePrefs['talk']!),
+                          _buildCardPreferenceIcon(
+                              Icons.forum_outlined, ridePrefs['talk']!),
                           const SizedBox(width: 6),
-                          _buildCardPreferenceIcon(Icons.pets_outlined, ridePrefs['animals']!),
+                          _buildCardPreferenceIcon(
+                              Icons.pets_outlined, ridePrefs['animals']!),
                           const SizedBox(width: 6),
-                          _buildCardPreferenceIcon(Icons.smoking_rooms_outlined, ridePrefs['smoke']!),
+                          _buildCardPreferenceIcon(Icons.smoking_rooms_outlined,
+                              ridePrefs['smoke']!),
                           const SizedBox(width: 6),
-                          _buildCardPreferenceIcon(Icons.ac_unit_outlined, ridePrefs['ac']!),
+                          _buildCardPreferenceIcon(
+                              Icons.ac_unit_outlined, ridePrefs['ac']!),
                         ],
                       ),
                     ),
@@ -1173,10 +1269,14 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
       width: 28,
       height: 28,
       decoration: BoxDecoration(
-        color: isActive ? AppColors.universityGreen.withValues(alpha: 0.1) : Colors.transparent,
+        color: isActive
+            ? AppColors.universityGreen.withValues(alpha: 0.1)
+            : Colors.transparent,
         borderRadius: BorderRadius.circular(8),
         border: Border.all(
-          color: isActive ? AppColors.universityGreen : Colors.white.withValues(alpha: 0.05),
+          color: isActive
+              ? AppColors.universityGreen
+              : Colors.white.withValues(alpha: 0.05),
           width: isActive ? 1.2 : 1,
         ),
       ),
@@ -1204,7 +1304,9 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
           return const Iterable<String>.empty();
         }
         return comuniMolise.where((String option) {
-          return option.toLowerCase().contains(textEditingValue.text.toLowerCase());
+          return option
+              .toLowerCase()
+              .contains(textEditingValue.text.toLowerCase());
         });
       },
       fieldViewBuilder: (context, controller, focusNode, onFieldSubmitted) {
@@ -1225,23 +1327,28 @@ class _SearchRideScreenState extends ConsumerState<SearchRideScreen> {
           child: Material(
             elevation: 4.0,
             color: AppColors.surfaceDark,
-            borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+            borderRadius:
+                const BorderRadius.vertical(bottom: Radius.circular(16)),
             child: Container(
               width: MediaQuery.of(context).size.width - 40,
               constraints: const BoxConstraints(maxHeight: 250),
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.white.withValues(alpha: 0.1)),
-                borderRadius: const BorderRadius.vertical(bottom: Radius.circular(16)),
+                borderRadius:
+                    const BorderRadius.vertical(bottom: Radius.circular(16)),
               ),
               child: ListView.separated(
                 padding: EdgeInsets.zero,
                 shrinkWrap: true,
                 itemCount: options.length,
-                separatorBuilder: (context, index) => Divider(color: Colors.white.withValues(alpha: 0.05), height: 1),
+                separatorBuilder: (context, index) => Divider(
+                    color: Colors.white.withValues(alpha: 0.05), height: 1),
                 itemBuilder: (BuildContext context, int index) {
                   final String option = options.elementAt(index);
                   return ListTile(
-                    title: Text(option, style: const TextStyle(color: AppColors.textPrimary, fontSize: 14)),
+                    title: Text(option,
+                        style: const TextStyle(
+                            color: AppColors.textPrimary, fontSize: 14)),
                     onTap: () => onSelected(option),
                   );
                 },

@@ -113,9 +113,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         title: const Row(
           children: [
-            Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 28),
+            Icon(Icons.warning_amber_rounded,
+                color: Colors.orangeAccent, size: 28),
             SizedBox(width: 10),
-            Text('Elimina Corsa', style: TextStyle(color: AppColors.textPrimary)),
+            Text('Elimina Corsa',
+                style: TextStyle(color: AppColors.textPrimary)),
           ],
         ),
         content: Text(
@@ -126,15 +128,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annulla', style: TextStyle(color: AppColors.textMuted)),
+            child: const Text('Annulla',
+                style: TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Elimina', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: const Text('Elimina',
+                style: TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -172,7 +178,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Future<void> _handleCancelBooking(PassengerBooking booking) async {
     final ride = booking.ride;
     final isRideInProgress = ride?.status == 'IN_PROGRESS';
-    final actionName = isRideInProgress ? 'Abbandona Corsa' : 'Cancella Prenotazione';
+    final actionName =
+        isRideInProgress ? 'Abbandona Corsa' : 'Cancella Prenotazione';
     final actionVerb = isRideInProgress ? 'abbandonare' : 'cancellare';
 
     final confirm = await showDialog<bool>(
@@ -185,7 +192,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         title: Row(
           children: [
-            const Icon(Icons.warning_amber_rounded, color: Colors.orangeAccent, size: 28),
+            const Icon(Icons.warning_amber_rounded,
+                color: Colors.orangeAccent, size: 28),
             const SizedBox(width: 10),
             Expanded(
               child: Text(
@@ -204,15 +212,19 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Annulla', style: TextStyle(color: AppColors.textMuted)),
+            child: const Text('Annulla',
+                style: TextStyle(color: AppColors.textMuted)),
           ),
           ElevatedButton(
             style: ElevatedButton.styleFrom(
               backgroundColor: Colors.redAccent,
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(12)),
             ),
             onPressed: () => Navigator.of(context).pop(true),
-            child: Text(isRideInProgress ? 'Abbandona' : 'Cancella', style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+            child: Text(isRideInProgress ? 'Abbandona' : 'Cancella',
+                style: const TextStyle(
+                    color: Colors.white, fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -226,7 +238,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text(isRideInProgress ? 'Corsa abbandonata.' : 'Prenotazione cancellata con successo.'),
+            content: Text(isRideInProgress
+                ? 'Corsa abbandonata.'
+                : 'Prenotazione cancellata con successo.'),
             backgroundColor: AppColors.universityGreen,
             behavior: SnackBarBehavior.floating,
           ),
@@ -328,14 +342,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 userProfileAsync.when(
                   data: (profile) {
                     final avatarUrl = profile?.avatarUrl;
-                    if (avatarUrl != null && avatarUrl.startsWith('data:image')) {
+                    if (avatarUrl != null &&
+                        avatarUrl.startsWith('data:image')) {
                       try {
                         final base64Str = avatarUrl.split(',').last;
                         final bytes = base64Decode(base64Str);
                         return Container(
                           decoration: BoxDecoration(
                             shape: BoxShape.circle,
-                            border: Border.all(color: AppColors.universityGreen, width: 2),
+                            border: Border.all(
+                                color: AppColors.universityGreen, width: 2),
                           ),
                           child: CircleAvatar(
                             radius: 35,
@@ -353,7 +369,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       child: const CircleAvatar(
                         radius: 35,
                         backgroundColor: AppColors.deepBlack,
-                        child: Icon(Icons.person_outline, size: 40, color: AppColors.universityGreen),
+                        child: Icon(Icons.person_outline,
+                            size: 40, color: AppColors.universityGreen),
                       ),
                     );
                   },
@@ -385,7 +402,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: const CircleAvatar(
                       radius: 35,
                       backgroundColor: AppColors.deepBlack,
-                      child: Icon(Icons.person_outline, size: 40, color: AppColors.universityGreen),
+                      child: Icon(Icons.person_outline,
+                          size: 40, color: AppColors.universityGreen),
                     ),
                   ),
                 ),
@@ -439,7 +457,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Reminder Card
             _buildReminderCard(myRidesAsync, myBookingsAsync),
             const SizedBox(height: 32),
-  
+
             // Tab Selection
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -449,29 +467,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 _buildTabItem(2, 'Archivio', Icons.archive_outlined),
               ],
             ),
-            
+
             const SizedBox(height: 24),
-            
+
             Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
                   _getTabName(_currentIndex),
-                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                  style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppColors.textPrimary),
                 ),
                 const SizedBox(height: 16),
                 _buildTabContent(userProfileAsync),
               ],
             ),
-            
+
             const SizedBox(height: 20),
           ],
         ),
       ),
     );
   }
-
-
 
   Widget _buildReminderCard(
     AsyncValue<List<Ride>> myRidesAsync,
@@ -509,9 +528,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final now = DateTime.now();
 
     // Corse come guidatore attive (OPEN o IN_PROGRESS)
-    final upcomingDriverRides = myRides.where((ride) =>
-        (ride.status == 'OPEN' || ride.status == 'IN_PROGRESS') &&
-        ride.departureTime.isAfter(now.subtract(const Duration(hours: 2)))).toList();
+    final upcomingDriverRides = myRides
+        .where((ride) =>
+            (ride.status == 'OPEN' || ride.status == 'IN_PROGRESS') &&
+            ride.departureTime.isAfter(now.subtract(const Duration(hours: 2))))
+        .toList();
 
     // Prenotazioni come passeggero attive (OPEN o IN_PROGRESS)
     final upcomingPassengerBookings = myBookings.where((b) {
@@ -521,7 +542,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ride.departureTime.isAfter(now.subtract(const Duration(hours: 2)));
     }).toList();
 
-    final totalUpcomingEvents = upcomingDriverRides.length + upcomingPassengerBookings.length;
+    final totalUpcomingEvents =
+        upcomingDriverRides.length + upcomingPassengerBookings.length;
     final hasEvents = totalUpcomingEvents > 0;
 
     final title = hasEvents ? 'Promemoria' : 'Nessun viaggio';
@@ -545,7 +567,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
-              hasEvents ? Icons.calendar_today_outlined : Icons.explore_outlined,
+              hasEvents
+                  ? Icons.calendar_today_outlined
+                  : Icons.explore_outlined,
               color: AppColors.universityGreen,
             ),
           ),
@@ -585,9 +609,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         return myRidesAsync.when(
           data: (rides) {
             // Mostra solo le corse attive: OPEN e IN_PROGRESS
-            final activeRides = rides.where((r) =>
-              r.status == 'OPEN' || r.status == 'IN_PROGRESS'
-            ).toList();
+            final activeRides = rides
+                .where((r) => r.status == 'OPEN' || r.status == 'IN_PROGRESS')
+                .toList();
             if (activeRides.isEmpty) {
               return const Center(
                 child: Padding(
@@ -595,7 +619,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.directions_car_outlined, size: 64, color: AppColors.textMuted),
+                      Icon(Icons.directions_car_outlined,
+                          size: 64, color: AppColors.textMuted),
                       SizedBox(height: 16),
                       Text(
                         'Inizia il tuo viaggio!',
@@ -619,7 +644,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               );
             }
             return Column(
-              children: activeRides.map((ride) => _buildDriverRideCard(ride)).toList(),
+              children: activeRides
+                  .map((ride) => _buildDriverRideCard(ride))
+                  .toList(),
             );
           },
           loading: () => Column(
@@ -655,7 +682,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             // Il provider già filtra le booking attive; questo è un secondo livello di sicurezza
             final activeBookings = bookings.where((b) {
               final rideStatus = b.ride?.status;
-              if (rideStatus == null) return false; // corsa non trovata = completata
+              if (rideStatus == null)
+                return false; // corsa non trovata = completata
               return rideStatus == 'OPEN' || rideStatus == 'IN_PROGRESS';
             }).toList();
             if (activeBookings.isEmpty) {
@@ -665,7 +693,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.assignment_outlined, size: 64, color: AppColors.textMuted),
+                      Icon(Icons.assignment_outlined,
+                          size: 64, color: AppColors.textMuted),
                       SizedBox(height: 16),
                       Text(
                         'Nessuna prenotazione attiva',
@@ -689,7 +718,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               );
             }
             return Column(
-              children: activeBookings.map((b) => _buildPassengerBookingCard(b)).toList(),
+              children: activeBookings
+                  .map((b) => _buildPassengerBookingCard(b))
+                  .toList(),
             );
           },
           loading: () => Column(
@@ -721,7 +752,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       case 2:
         final archivedRidesAsync = ref.watch(archivedRidesProvider);
         final profileAsync = ref.watch(userProfileProvider);
-        
+
         return archivedRidesAsync.when(
           data: (rides) {
             if (rides.isEmpty) {
@@ -731,7 +762,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Column(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.archive_outlined, size: 64, color: AppColors.textMuted),
+                      Icon(Icons.archive_outlined,
+                          size: 64, color: AppColors.textMuted),
                       SizedBox(height: 16),
                       Text(
                         'Nessun evento in archivio',
@@ -754,17 +786,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 ),
               );
             }
-            
+
             final profile = profileAsync.value;
             final String myUsername = profile?.username ?? '';
 
             return Column(
               children: rides.map((ride) {
                 final day = ride.departureTime.day.toString().padLeft(2, '0');
-                final month = ride.departureTime.month.toString().padLeft(2, '0');
-                final departureTime = '${ride.departureTime.hour.toString().padLeft(2, '0')}:${ride.departureTime.minute.toString().padLeft(2, '0')}';
-                final arrivalTime = '${ride.arrivalTimeEst.hour.toString().padLeft(2, '0')}:${ride.arrivalTimeEst.minute.toString().padLeft(2, '0')}';
-                final stops = ride.hotspots.isEmpty ? 'Nessuna' : ride.hotspots.join(', ');
+                final month =
+                    ride.departureTime.month.toString().padLeft(2, '0');
+                final departureTime =
+                    '${ride.departureTime.hour.toString().padLeft(2, '0')}:${ride.departureTime.minute.toString().padLeft(2, '0')}';
+                final arrivalTime =
+                    '${ride.arrivalTimeEst?.hour.toString().padLeft(2, '0') ?? '--'}:${ride.arrivalTimeEst?.minute.toString().padLeft(2, '0') ?? '--'}';
+                final stops = ride.hotspots.isEmpty
+                    ? 'Nessuna'
+                    : ride.hotspots.join(', ');
 
                 final isPassenger = ride.driverUsername != myUsername;
 
@@ -789,21 +826,29 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           error: (err, stack) {
             String displayMessage;
             final errStr = err.toString().toLowerCase();
-            if (errStr.contains('403') || errStr.contains('non autorizzato') || errStr.contains('accesso')) {
-              displayMessage = 'Sessione non valida. Prova a effettuare di nuovo il login.';
-            } else if (errStr.contains('timeout') || errStr.contains('connessione') || errStr.contains('rete')) {
-              displayMessage = 'Impossibile raggiungere il server. Controlla la connessione.';
+            if (errStr.contains('403') ||
+                errStr.contains('non autorizzato') ||
+                errStr.contains('accesso')) {
+              displayMessage =
+                  'Sessione non valida. Prova a effettuare di nuovo il login.';
+            } else if (errStr.contains('timeout') ||
+                errStr.contains('connessione') ||
+                errStr.contains('rete')) {
+              displayMessage =
+                  'Impossibile raggiungere il server. Controlla la connessione.';
             } else if (errStr.contains('500')) {
               displayMessage = 'Errore del server. Riprova più tardi.';
             } else {
-              displayMessage = 'Errore nel caricamento dell\'archivio. Riprova.';
+              displayMessage =
+                  'Errore nel caricamento dell\'archivio. Riprova.';
             }
             return Center(
               child: Padding(
                 padding: const EdgeInsets.symmetric(vertical: 40),
                 child: Column(
                   children: [
-                    const Icon(Icons.cloud_off_outlined, size: 48, color: AppColors.textMuted),
+                    const Icon(Icons.cloud_off_outlined,
+                        size: 48, color: AppColors.textMuted),
                     const SizedBox(height: 12),
                     Text(
                       displayMessage,
@@ -863,8 +908,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildDriverRideCard(Ride ride) {
     final day = ride.departureTime.day.toString().padLeft(2, '0');
     final month = ride.departureTime.month.toString().padLeft(2, '0');
-    final departureTime = '${ride.departureTime.hour.toString().padLeft(2, '0')}:${ride.departureTime.minute.toString().padLeft(2, '0')}';
-    final arrivalTime = '${ride.arrivalTimeEst.hour.toString().padLeft(2, '0')}:${ride.arrivalTimeEst.minute.toString().padLeft(2, '0')}';
+    final departureTime =
+        '${ride.departureTime.hour.toString().padLeft(2, '0')}:${ride.departureTime.minute.toString().padLeft(2, '0')}';
+    final arrivalTime =
+        '${ride.arrivalTimeEst?.hour.toString().padLeft(2, '0') ?? '--'}:${ride.arrivalTimeEst?.minute.toString().padLeft(2, '0') ?? '--'}';
     final stops = ride.hotspots.isEmpty ? 'Nessuna' : ride.hotspots.join(', ');
     final isActionLoading = _activeActionRideId == ride.id;
 
@@ -902,11 +949,16 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
       );
     } else {
       if (ride.status == 'OPEN') {
-        actions.add(_buildActionButton('Avvia', () => _handleStartRide(ride), isPrimary: true));
-        actions.add(_buildActionButton('Elimina', () => _confirmAndDeleteRide(ride)));
+        actions.add(_buildActionButton('Avvia', () => _handleStartRide(ride),
+            isPrimary: true));
+        actions.add(
+            _buildActionButton('Elimina', () => _confirmAndDeleteRide(ride)));
       } else if (ride.status == 'IN_PROGRESS') {
-        actions.add(_buildActionButton('Mappa', () => _showMapScreen(ride, isDriver: true)));
-        actions.add(_buildActionButton('Completa', () => _handleCompleteRide(ride), isPrimary: true));
+        actions.add(_buildActionButton(
+            'Mappa', () => _showMapScreen(ride, isDriver: true)));
+        actions.add(_buildActionButton(
+            'Completa', () => _handleCompleteRide(ride),
+            isPrimary: true));
       }
     }
 
@@ -925,7 +977,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: AppColors.deepBlack,
                   borderRadius: BorderRadius.circular(16),
@@ -942,7 +995,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                     Text(
                       month,
-                      style: const TextStyle(fontSize: 14, color: AppColors.universityGreen, fontWeight: FontWeight.bold),
+                      style: const TextStyle(
+                          fontSize: 14,
+                          color: AppColors.universityGreen,
+                          fontWeight: FontWeight.bold),
                     ),
                   ],
                 ),
@@ -956,10 +1012,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: _buildRouteInfo('Partenza', '${ride.departureCity}, $departureTime', isBold: true),
+                          child: _buildRouteInfo('Partenza',
+                              '${ride.departureCity}, $departureTime',
+                              isBold: true),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: statusColor.withValues(alpha: 0.15),
                             borderRadius: BorderRadius.circular(8),
@@ -978,25 +1037,35 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     const SizedBox(height: 8),
                     _buildRouteInfo('Fermate', stops, isSmall: true),
                     const SizedBox(height: 8),
-                    _buildRouteInfo('Arrivo', '${ride.arrivalCity}, $arrivalTime', isBold: true),
-                    if ((ride.vehicleModel != null && ride.vehicleModel!.isNotEmpty) || ride.totalSeats > 0) ...[
+                    _buildRouteInfo(
+                        'Arrivo', '${ride.arrivalCity}, $arrivalTime',
+                        isBold: true),
+                    if ((ride.vehicleModel != null &&
+                            ride.vehicleModel!.isNotEmpty) ||
+                        ride.totalSeats > 0) ...[
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.airline_seat_recline_normal_outlined, size: 14, color: AppColors.textMuted),
+                          const Icon(Icons.airline_seat_recline_normal_outlined,
+                              size: 14, color: AppColors.textMuted),
                           const SizedBox(width: 4),
                           Text(
                             'Posti: ${ride.availableSeats}/${ride.totalSeats}',
-                            style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                            style: const TextStyle(
+                                fontSize: 12, color: AppColors.textSecondary),
                           ),
-                          if (ride.vehicleModel != null && ride.vehicleModel!.isNotEmpty) ...[
+                          if (ride.vehicleModel != null &&
+                              ride.vehicleModel!.isNotEmpty) ...[
                             const SizedBox(width: 12),
-                            const Icon(Icons.directions_car_outlined, size: 14, color: AppColors.textMuted),
+                            const Icon(Icons.directions_car_outlined,
+                                size: 14, color: AppColors.textMuted),
                             const SizedBox(width: 4),
                             Flexible(
                               child: Text(
                                 '${ride.vehicleModel}${ride.vehiclePlate != null ? " (${ride.vehiclePlate})" : ""}',
-                                style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                                style: const TextStyle(
+                                    fontSize: 12,
+                                    color: AppColors.textSecondary),
                                 overflow: TextOverflow.ellipsis,
                               ),
                             ),
@@ -1014,11 +1083,15 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           const SizedBox(height: 12),
           const Row(
             children: [
-              Icon(Icons.people_alt_outlined, size: 16, color: AppColors.universityGreen),
+              Icon(Icons.people_alt_outlined,
+                  size: 16, color: AppColors.universityGreen),
               SizedBox(width: 6),
               Text(
                 'Richieste e Passeggeri',
-                style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    color: AppColors.textPrimary),
               ),
             ],
           ),
@@ -1033,7 +1106,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       padding: EdgeInsets.symmetric(vertical: 4),
                       child: Text(
                         'Nessun passeggero ha ancora richiesto di partecipare.',
-                        style: TextStyle(fontSize: 12, color: AppColors.textMuted, fontStyle: FontStyle.italic),
+                        style: TextStyle(
+                            fontSize: 12,
+                            color: AppColors.textMuted,
+                            fontStyle: FontStyle.italic),
                       ),
                     );
                   }
@@ -1047,7 +1123,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         badgeText = Colors.amber;
                         label = 'In attesa';
                       } else if (b.status == 'CONFIRMED') {
-                        badgeBg = AppColors.universityGreen.withValues(alpha: 0.15);
+                        badgeBg =
+                            AppColors.universityGreen.withValues(alpha: 0.15);
                         badgeText = AppColors.universityGreen;
                         label = 'Confermato';
                       } else {
@@ -1071,14 +1148,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Text(
-                                    b.passengerFullName.isNotEmpty ? b.passengerFullName : b.passengerUsername,
-                                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.bold, color: AppColors.textPrimary),
+                                    b.passengerFullName.isNotEmpty
+                                        ? b.passengerFullName
+                                        : b.passengerUsername,
+                                    style: const TextStyle(
+                                        fontSize: 13,
+                                        fontWeight: FontWeight.bold,
+                                        color: AppColors.textPrimary),
                                   ),
-                                  if (b.hotspotChosen != null && b.hotspotChosen!.isNotEmpty) ...[
+                                  if (b.hotspotChosen != null &&
+                                      b.hotspotChosen!.isNotEmpty) ...[
                                     const SizedBox(height: 2),
                                     Text(
                                       'Fermata: ${b.hotspotChosen}',
-                                      style: const TextStyle(fontSize: 11, color: AppColors.textSecondary),
+                                      style: const TextStyle(
+                                          fontSize: 11,
+                                          color: AppColors.textSecondary),
                                     ),
                                   ],
                                 ],
@@ -1088,14 +1173,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             Row(
                               children: [
                                 Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 8, vertical: 2),
                                   decoration: BoxDecoration(
                                     color: badgeBg,
                                     borderRadius: BorderRadius.circular(6),
                                   ),
                                   child: Text(
                                     label,
-                                    style: TextStyle(color: badgeText, fontSize: 10, fontWeight: FontWeight.bold),
+                                    style: TextStyle(
+                                        color: badgeText,
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.bold),
                                   ),
                                 ),
                                 if (b.status == 'PENDING') ...[
@@ -1103,15 +1192,20 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                   IconButton(
                                     constraints: const BoxConstraints(),
                                     padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.check_circle_outline, color: AppColors.universityGreen, size: 22),
-                                    onPressed: () => _handleAcceptBooking(b.id, ride.id),
+                                    icon: const Icon(Icons.check_circle_outline,
+                                        color: AppColors.universityGreen,
+                                        size: 22),
+                                    onPressed: () =>
+                                        _handleAcceptBooking(b.id, ride.id),
                                   ),
                                   const SizedBox(width: 4),
                                   IconButton(
                                     constraints: const BoxConstraints(),
                                     padding: EdgeInsets.zero,
-                                    icon: const Icon(Icons.cancel_outlined, color: Colors.redAccent, size: 22),
-                                    onPressed: () => _handleRejectBooking(b.id, ride.id),
+                                    icon: const Icon(Icons.cancel_outlined,
+                                        color: Colors.redAccent, size: 22),
+                                    onPressed: () =>
+                                        _handleRejectBooking(b.id, ride.id),
                                   ),
                                 ],
                               ],
@@ -1127,7 +1221,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: SizedBox(
                     width: 16,
                     height: 16,
-                    child: CircularProgressIndicator(strokeWidth: 2, color: AppColors.universityGreen),
+                    child: CircularProgressIndicator(
+                        strokeWidth: 2, color: AppColors.universityGreen),
                   ),
                 ),
                 error: (err, _) => const Text(
@@ -1157,18 +1252,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ? '${ride.departureTime.hour.toString().padLeft(2, '0')}:${ride.departureTime.minute.toString().padLeft(2, '0')}'
         : '--:--';
     final arrivalTime = ride != null
-        ? '${ride.arrivalTimeEst.hour.toString().padLeft(2, '0')}:${ride.arrivalTimeEst.minute.toString().padLeft(2, '0')}'
+        ? '${ride.arrivalTimeEst?.hour.toString().padLeft(2, '0') ?? '--'}:${ride.arrivalTimeEst?.minute.toString().padLeft(2, '0') ?? '--'}'
         : '--:--';
     final day = ride != null
         ? ride.departureTime.day.toString().padLeft(2, '0')
-        : (booking.createdAt != null ? booking.createdAt!.day.toString().padLeft(2, '0') : '--');
+        : (booking.createdAt != null
+            ? booking.createdAt!.day.toString().padLeft(2, '0')
+            : '--');
     final month = ride != null
         ? ride.departureTime.month.toString().padLeft(2, '0')
-        : (booking.createdAt != null ? booking.createdAt!.month.toString().padLeft(2, '0') : '--');
+        : (booking.createdAt != null
+            ? booking.createdAt!.month.toString().padLeft(2, '0')
+            : '--');
 
     final departureCity = ride?.departureCity ?? 'Partenza non specificata';
     final arrivalCity = ride?.arrivalCity ?? 'Arrivo non specificato';
-    final driverName = ride?.driverFullName.isNotEmpty == true ? ride!.driverFullName : null;
+    final driverName =
+        ride?.driverFullName.isNotEmpty == true ? ride!.driverFullName : null;
     final hotspot = booking.hotspotChosen ?? 'Non specificato';
 
     final isRideInProgress = ride?.status == 'IN_PROGRESS';
@@ -1213,7 +1313,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: AppColors.deepBlack,
                   borderRadius: BorderRadius.circular(16),
@@ -1248,10 +1349,13 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Expanded(
-                          child: _buildRouteInfo('Partenza', '$departureCity, $departureTime', isBold: true),
+                          child: _buildRouteInfo(
+                              'Partenza', '$departureCity, $departureTime',
+                              isBold: true),
                         ),
                         Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 10, vertical: 4),
                           decoration: BoxDecoration(
                             color: statusBgColor,
                             borderRadius: BorderRadius.circular(8),
@@ -1268,19 +1372,23 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       ],
                     ),
                     const SizedBox(height: 8),
-                    _buildRouteInfo('Punto di Incontro', hotspot, isSmall: true),
+                    _buildRouteInfo('Punto di Incontro', hotspot,
+                        isSmall: true),
                     const SizedBox(height: 8),
-                    _buildRouteInfo('Arrivo', '$arrivalCity, $arrivalTime', isBold: true),
+                    _buildRouteInfo('Arrivo', '$arrivalCity, $arrivalTime',
+                        isBold: true),
                     if (driverName != null) ...[
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.person_outline, size: 14, color: AppColors.textMuted),
+                          const Icon(Icons.person_outline,
+                              size: 14, color: AppColors.textMuted),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               'Guidatore: $driverName',
-                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                              style: const TextStyle(
+                                  fontSize: 12, color: AppColors.textSecondary),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -1298,7 +1406,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
               if (isRideInProgress && ride != null) ...[
-                _buildActionButton('Mappa', () => _showMapScreen(ride, isDriver: false)),
+                _buildActionButton(
+                    'Mappa', () => _showMapScreen(ride, isDriver: false)),
                 const SizedBox(width: 8),
               ],
               if (isActionLoading)
@@ -1311,7 +1420,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 )
               else
-                _buildActionButton(buttonLabel, () => _handleCancelBooking(booking)),
+                _buildActionButton(
+                    buttonLabel, () => _handleCancelBooking(booking)),
             ],
           ),
         ],
@@ -1319,7 +1429,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildRouteInfo(String label, String value, {bool isBold = false, bool isSmall = false}) {
+  Widget _buildRouteInfo(String label, String value,
+      {bool isBold = false, bool isSmall = false}) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -1346,26 +1457,30 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildActionButton(String label, VoidCallback onPressed, {bool isPrimary = false}) {
+  Widget _buildActionButton(String label, VoidCallback onPressed,
+      {bool isPrimary = false}) {
     return Padding(
       padding: const EdgeInsets.only(left: 8),
       child: ElevatedButton(
         onPressed: onPressed,
         style: ElevatedButton.styleFrom(
-          backgroundColor: isPrimary ? AppColors.universityGreen : AppColors.deepBlack,
+          backgroundColor:
+              isPrimary ? AppColors.universityGreen : AppColors.deepBlack,
           foregroundColor: Colors.white,
           minimumSize: const Size(80, 36),
           padding: const EdgeInsets.symmetric(horizontal: 16),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          shape:
+              RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
         ),
-        child: Text(label, style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
+        child: Text(label,
+            style: const TextStyle(fontSize: 12, fontWeight: FontWeight.bold)),
       ),
     );
   }
 
   Widget _buildTabItem(int index, String label, IconData icon) {
     bool isSelected = _currentIndex == index;
-    
+
     return GestureDetector(
       onTap: () => setState(() => _currentIndex = index),
       child: Container(
@@ -1374,7 +1489,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         decoration: BoxDecoration(
           color: isSelected ? AppColors.universityGreen : AppColors.surfaceDark,
           borderRadius: BorderRadius.circular(20),
-          border: isSelected ? null : Border.all(color: Colors.white.withValues(alpha: 0.05)),
+          border: isSelected
+              ? null
+              : Border.all(color: Colors.white.withValues(alpha: 0.05)),
         ),
         child: Column(
           children: [
@@ -1401,10 +1518,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   String _getTabName(int index) {
     switch (index) {
-      case 0: return 'I miei eventi';
-      case 1: return 'Prenotazioni';
-      case 2: return 'Archivio';
-      default: return '';
+      case 0:
+        return 'I miei eventi';
+      case 1:
+        return 'Prenotazioni';
+      case 2:
+        return 'Archivio';
+      default:
+        return '';
     }
   }
 
@@ -1431,7 +1552,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                 decoration: BoxDecoration(
                   color: AppColors.deepBlack,
                   borderRadius: BorderRadius.circular(16),
@@ -1462,21 +1584,27 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    _buildRouteInfo('Partenza', '${ride.departureCity}, $departureTime', isBold: true),
+                    _buildRouteInfo(
+                        'Partenza', '${ride.departureCity}, $departureTime',
+                        isBold: true),
                     const SizedBox(height: 8),
                     _buildRouteInfo('Fermate', stops, isSmall: true),
                     const SizedBox(height: 8),
-                    _buildRouteInfo('Arrivo', '${ride.arrivalCity}, $arrivalTime', isBold: true),
+                    _buildRouteInfo(
+                        'Arrivo', '${ride.arrivalCity}, $arrivalTime',
+                        isBold: true),
                     if (isPassenger && ride.driverFullName.isNotEmpty) ...[
                       const SizedBox(height: 8),
                       Row(
                         children: [
-                          const Icon(Icons.person_outline, size: 14, color: AppColors.textMuted),
+                          const Icon(Icons.person_outline,
+                              size: 14, color: AppColors.textMuted),
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
                               'Guidatore: ${ride.driverFullName}',
-                              style: const TextStyle(fontSize: 12, color: AppColors.textSecondary),
+                              style: const TextStyle(
+                                  fontSize: 12, color: AppColors.textSecondary),
                               overflow: TextOverflow.ellipsis,
                               maxLines: 1,
                             ),
@@ -1494,7 +1622,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Container(
-                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                 decoration: BoxDecoration(
                   color: isPassenger
                       ? Colors.blue.withValues(alpha: 0.15)
@@ -1504,7 +1633,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Text(
                   isPassenger ? 'Passeggero' : 'Conducente',
                   style: TextStyle(
-                    color: isPassenger ? Colors.blue[300] : AppColors.universityGreen,
+                    color: isPassenger
+                        ? Colors.blue[300]
+                        : AppColors.universityGreen,
                     fontSize: 11,
                     fontWeight: FontWeight.bold,
                   ),
@@ -1517,13 +1648,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       rideId: ride.id,
                       driverUsername: ride.driverUsername
                     )));
-                    
+
                     return isReviewedAsync.when(
                       data: (isReviewed) {
                         if (isReviewed) {
                           return const Row(
                             children: [
-                              Icon(Icons.check_circle, size: 14, color: AppColors.universityGreen),
+                              Icon(Icons.check_circle,
+                                  size: 14, color: AppColors.universityGreen),
                               SizedBox(width: 4),
                               Text(
                                 'Recensito',
@@ -1557,7 +1689,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           color: AppColors.universityGreen,
                         ),
                       ),
-                      error: (_, __) => const Text('Errore', style: TextStyle(color: AppColors.textMuted, fontSize: 12)),
+                      error: (_, __) => const Text('Errore',
+                          style: TextStyle(
+                              color: AppColors.textMuted, fontSize: 12)),
                     );
                   },
                 ),
